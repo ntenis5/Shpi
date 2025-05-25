@@ -1,139 +1,108 @@
-// Open map on globe click
-function openMap() {
-  const mapDiv = document.getElementById('map');
-  mapDiv.style.display = 'block';
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
 
-  if (!window.myMap) {
-    window.myMap = L.map('map').setView([41.3275, 19.8189], 13);
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAdKeG2FPS85pG8pZbNf_Fg7Yh-34bZruk",
+  authDomain: "shpipron.firebaseapp.com",
+  projectId: "shpipron",
+  storageBucket: "shpipron.appspot.com",
+  messagingSenderId: "42251121368",
+  appId: "1:42251121368:web:f528291f5cdbfcb87bddad",
+  measurementId: "G-XYR0NH53FC"
+};
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(window.myMap);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-    // Example property
-    const property = {
-      title: "Modern Apartment in Tirana",
-      lat: 41.3275,
-      lng: 19.8189,
-      price: "€120,000",
-      phone: "+355 69 123 4567"
-    };
+// Shto pronë në Firebase
+document.getElementById("propertyForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const popupContent = `
-      <b>${property.title}</b><br>
-      Price: ${property.price}<br>
-      <button style="background-color:green; color:white; padding:5px 10px; border:none; border-radius:5px;">
-        Call: ${property.phone}
-      </button>
-    `;
+  const title = document.getElementById("title").value;
+  const description = document.getElementById("description").value;
+  const price = document.getElementById("price").value;
+  const location = document.getElementById("location").value;
+  const imageFile = document.getElementById("image").files[0];
 
-    L.marker([property.lat, property.lng])
-      .addTo(window.myMap)
-      .bindPopup(popupContent);
+  try {
+    // Ngarko imazhin në Firebase Storage
+    const imageRef = ref(storage, "properties/" + imageFile.name);
+    await uploadBytes(imageRef, imageFile);
+    const imageUrl = await getDownloadURL(imageRef);
+
+    // Ruaj të dhënat në Firestore
+    await addDoc(collection(db, "properties"), {
+      title,
+      description,
+      price: Number(price),
+      location,
+      imageUrl
+    });
+
+    alert("Prona u shtua me sukses!");
+    document.getElementById("propertyForm").reset();
+    loadProperties(); // Rifresko pronat
+  } catch (err) {
+    alert("Gabim gjatë shtimit: " + err.message);
   }
+});
+
+// Ngarko dhe shfaq pronat nga Firebase
+async function loadProperties() {
+  const propertyList = document.getElementById("property-list");
+  propertyList.innerHTML = "";
+
+  const querySnapshot = await getDocs(collection(db, "properties"));
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+
+    // Shto në listë
+    const item = document.createElement("div");
+    item.className = "property-item";
+    item.innerHTML = `
+      <h3>${data.title}</h3>
+      <img src="${data.imageUrl}" width="200" />
+      <p>${data.description}</p>
+      <p><strong>Çmimi:</strong> €${data.price}</p>
+      <p><strong>Vendndodhja:</strong> ${data.location}</p>
+    `;
+    propertyList.appendChild(item);
+
+    // Shto në hartë
+    geocodeAddress(data.location, (coords) => {
+      new google.maps.Marker({
+        position: coords,
+        map: map,
+        title: data.title
+      });
+    });
+  });
 }
 
-// Handle category click
-document.querySelectorAll('.category').forEach(cat => {
-  cat.addEventListener('click', () => {
-    const name = cat.textContent.trim();
-    console.log(`Category selected: ${name}`);
-    // Future: filter properties by category
+// Inicializo Google Maps
+let map;
+window.initMap = function () {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 41.3275, lng: 19.8189 }, // Tirana
+    zoom: 10
   });
-});
-// Property data
-const properties = [
-  {
-    title: "Modern Apartment in Tirana",
-    lat: 41.3275,
-    lng: 19.8189,
-    price: "€120,000",
-    area: "95m²",
-    floor: "3rd",
-    rooms: 3,
-    baths: 2,
-    address: "Rruga Myslym Shyri, Tirana",
-    country: "Albania",
-    city: "Tirana",
-    phone: "+355 69 123 4567",
-    images: [
-      "https://via.placeholder.com/300x200?text=Photo+1",
-      "https://via.placeholder.com/300x200?text=Photo+2",
-      "https://via.placeholder.com/300x200?text=Photo+3"
-    ]
-  },
-  {
-    title: "Luxury Villa in Durrës",
-    lat: 41.312,
-    lng: 19.445,
-    price: "€450,000",
-    area: "300m²",
-    floor: "2 floors",
-    rooms: 5,
-    baths: 4,
-    address: "Lalëz Bay, Durrës",
-    country: "Albania",
-    city: "Durrës",
-    phone: "+355 68 987 6543",
-    images: [
-      "https://via.placeholder.com/300x200?text=Villa+1",
-      "https://via.placeholder.com/300x200?text=Villa+2",
-      "https://via.placeholder.com/300x200?text=Villa+3"
-    ]
-  },
-  {
-    title: "Private House in Vlorë",
-    lat: 40.466,
-    lng: 19.489,
-    price: "€250,000",
-    area: "180m²",
-    floor: "1st",
-    rooms: 4,
-    baths: 2,
-    address: "Uji i Ftohtë, Vlorë",
-    country: "Albania",
-    city: "Vlorë",
-    phone: "+355 67 111 2233",
-    images: [
-      "https://via.placeholder.com/300x200?text=House+1",
-      "https://via.placeholder.com/300x200?text=House+2"
-    ]
-  }
-];
 
-// Open and populate map
-function openMap() {
-  const mapDiv = document.getElementById('map');
-  mapDiv.style.display = 'block';
+  loadProperties(); // Ngarko pronat kur harta hapet
+};
 
-  if (!window.myMap) {
-    window.myMap = L.map('map').setView([41.3275, 19.8189], 8);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(window.myMap);
-
-    // Loop through properties and add markers
-    properties.forEach((property, index) => {
-      const popupContent = `
-        <div style="max-width: 300px;">
-          <div class="slider">
-            ${property.images.map(src => `<img src="${src}" style="width:100%; margin-bottom:5px;" />`).join("")}
-          </div>
-          <b>${property.title}</b><br>
-          ${property.address}, ${property.city}, ${property.country}<br>
-          Price: ${property.price}<br>
-          Area: ${property.area} | Floor: ${property.floor}<br>
-          Rooms: ${property.rooms} | Baths: ${property.baths}<br><br>
-          <button style="background-color:green; color:white; padding:8px 12px; border:none; border-radius:5px;">
-            Call: ${property.phone}
-          </button>
-        </div>
-      `;
-
-      L.marker([property.lat, property.lng])
-        .addTo(window.myMap)
-        .bindPopup(popupContent);
-    });
-  }
+// Geokodo adresën në koordinata
+function geocodeAddress(address, callback) {
+  const geocoder = new google.maps.Geocoder();
+  geocoder.geocode({ address }, (results, status) => {
+    if (status === "OK" && results[0]) {
+      callback(results[0].geometry.location);
+    } else {
+      console.warn("Geocode nuk funksionoi për: " + address);
+    }
+  });
 }
