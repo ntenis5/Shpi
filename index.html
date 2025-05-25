@@ -57,4 +57,11 @@
 
   <script type="module" src="script.js"></script>
 </body>
+  <script>
+  // Kontrollo nëse përdoruesi është admin
+  const isAdmin = sessionStorage.getItem("isAdmin");
+  if (isAdmin !== "true") {
+    document.getElementById("add-property").style.display = "none";
+  }
+  </script>
 </html>
