@@ -1,9 +1,9 @@
-// Import Firebase modules
+// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
 
-// Firebase configuration
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAdKeG2FPS85pG8pZbNf_Fg7Yh-34bZruk",
   authDomain: "shpipron.firebaseapp.com",
@@ -14,12 +14,12 @@ const firebaseConfig = {
   measurementId: "G-XYR0NH53FC"
 };
 
-// Initialize Firebase
+// Init Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Shto pronë në Firebase
+// Shto pronë
 document.getElementById("propertyForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -30,12 +30,10 @@ document.getElementById("propertyForm").addEventListener("submit", async (e) => 
   const imageFile = document.getElementById("image").files[0];
 
   try {
-    // Ngarko imazhin në Firebase Storage
     const imageRef = ref(storage, "properties/" + imageFile.name);
     await uploadBytes(imageRef, imageFile);
     const imageUrl = await getDownloadURL(imageRef);
 
-    // Ruaj të dhënat në Firestore
     await addDoc(collection(db, "properties"), {
       title,
       description,
@@ -46,13 +44,13 @@ document.getElementById("propertyForm").addEventListener("submit", async (e) => 
 
     alert("Prona u shtua me sukses!");
     document.getElementById("propertyForm").reset();
-    loadProperties(); // Rifresko pronat
+    loadProperties();
   } catch (err) {
-    alert("Gabim gjatë shtimit: " + err.message);
+    alert("Gabim: " + err.message);
   }
 });
 
-// Ngarko dhe shfaq pronat nga Firebase
+// Ngarko pronat nga Firebase
 async function loadProperties() {
   const propertyList = document.getElementById("property-list");
   propertyList.innerHTML = "";
@@ -61,7 +59,6 @@ async function loadProperties() {
   querySnapshot.forEach((doc) => {
     const data = doc.data();
 
-    // Shto në listë
     const item = document.createElement("div");
     item.className = "property-item";
     item.innerHTML = `
@@ -84,7 +81,7 @@ async function loadProperties() {
   });
 }
 
-// Inicializo Google Maps
+// Inicializo hartën
 let map;
 window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
@@ -92,17 +89,17 @@ window.initMap = function () {
     zoom: 10
   });
 
-  loadProperties(); // Ngarko pronat kur harta hapet
+  loadProperties();
 };
 
-// Geokodo adresën në koordinata
+// Geocode (tekst në koordinata)
 function geocodeAddress(address, callback) {
   const geocoder = new google.maps.Geocoder();
   geocoder.geocode({ address }, (results, status) => {
     if (status === "OK" && results[0]) {
       callback(results[0].geometry.location);
     } else {
-      console.warn("Geocode nuk funksionoi për: " + address);
+      console.warn("Geocode failed for: " + address);
     }
   });
 }
