@@ -173,3 +173,105 @@ footer {
     width: 95%;
   }
 }
+#top-filters {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;
+  z-index: 10;
+}
+
+#top-filters button {
+  background: white;
+  border: 2px solid #007f5f;
+  color: #007f5f;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#top-filters button.active {
+  background: #007f5f;
+  color: white;
+}
+
+#map-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#map {
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  margin: auto;
+  z-index: 1;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+#category-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  margin-left: -300px;
+  margin-top: -300px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.category {
+  position: absolute;
+  width: 100px;
+  height: 40px;
+  background: #d9ed92;
+  color: #333;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 20px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+/* Poziciono kategori në rreth */
+.category:nth-child(1) { top: 0%; left: 50%; transform: translate(-50%, -50%); }
+.category:nth-child(2) { top: 20%; left: 85%; transform: translate(-50%, -50%); }
+.category:nth-child(3) { top: 50%; left: 100%; transform: translate(-50%, -50%); }
+.category:nth-child(4) { top: 80%; left: 85%; transform: translate(-50%, -50%); }
+.category:nth-child(5) { top: 100%; left: 50%; transform: translate(-50%, -50%); }
+.category:nth-child(6) { top: 80%; left: 15%; transform: translate(-50%, -50%); }
+.category:nth-child(7) { top: 20%; left: 15%; transform: translate(-50%, -50%); }
+
+.category:hover {
+  background: #b5e48c;
+}
+
+#bottom-filters {
+  position: absolute;
+  bottom: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;
+  font-size: 0.9rem;
+  z-index: 10;
+}
+
+#bottom-filters label {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0.5rem;
+}
