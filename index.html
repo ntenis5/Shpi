@@ -1,0 +1,32 @@
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real Estate Explorer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</head>
+<body>
+  <header>
+    <h1>Real Estate Explorer</h1>
+    <nav>
+      <button id="btn-sale" class="active">Sale</button>
+      <button id="btn-rent">Rent</button>
+    </nav>
+  </header>  <section id="categories">
+    <div class="category" data-category="Business">Business</div>
+    <div class="category" data-category="Apartments">Apartments</div>
+    <div class="category" data-category="Villas">Villas</div>
+    <div class="category" data-category="Private">Private</div>
+    <div class="category" data-category="Parcel">Parcel</div>
+    <div class="category" data-category="Parking">Parking</div>
+    <div class="category" data-category="Store">Store</div>
+  </section>  <section id="filters">
+    <label>Price from €<input type="number" id="filter-price-min" /></label>
+    <label>to €<input type="number" id="filter-price-max" /></label>
+    <label>Country <input type="text" id="filter-country" placeholder="e.g. Albania" /></label>
+    <label>City <input type="text" id="filter-city" placeholder="e.g. Tirana" /></label>
+  </section>  <main>
+    <div id="map"></div>
+    <div id="property-list"></div>
+  </main>  <footer>
+    <p>&copy; 2025 Real Estate Explorer. All rights reserved.</p>
+  </footer>  <script src="script.js"></script></body>
+</html>
