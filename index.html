@@ -34,45 +34,27 @@
   </section>
 
   <main>
-    <div id="map"></div>
+    <div id="map" style="height: 400px;"></div>
     <div id="property-list"></div>
   </main>
+
+  <!-- Forma për shtimin e pronave -->
+  <section id="add-property">
+    <h2>Shto një pronë</h2>
+    <form id="propertyForm">
+      <input type="text" id="title" placeholder="Titulli" required />
+      <textarea id="description" placeholder="Përshkrimi" required></textarea>
+      <input type="number" id="price" placeholder="Çmimi (€)" required />
+      <input type="text" id="location" placeholder="Vendndodhja" required />
+      <input type="file" id="image" required />
+      <button type="submit">Shto Pronën</button>
+    </form>
+  </section>
 
   <footer>
     <p>&copy; 2025 Real Estate Explorer. All rights reserved.</p>
   </footer>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAdKeG2FPS85pG8pZbNf_Fg7Yh-34bZruk",
-      authDomain: "shpipron.firebaseapp.com",
-      projectId: "shpipron",
-      storageBucket: "shpipron.firebasestorage.app",
-      messagingSenderId: "42251121368",
-      appId: "1:42251121368:web:f528291f5cdbfcb87bddad",
-      measurementId: "G-XYR0NH53FC"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
-
-  <!-- Skripti yt kryesor -->
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
-  <section id="add-property">
-  <h2>Shto një pronë</h2>
-  <form id="propertyForm">
-    <input type="text" id="title" placeholder="Titulli" required />
-    <textarea id="description" placeholder="Përshkrimi" required></textarea>
-    <input type="number" id="price" placeholder="Çmimi (€)" required />
-    <input type="text" id="location" placeholder="Vendndodhja" required />
-    <input type="file" id="image" required />
-    <button type="submit">Shto Pronën</button>
-  </form>
-  </section>
 </html>
