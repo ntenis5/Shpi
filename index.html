@@ -52,6 +52,16 @@
   </section>
 
   <footer>
+    fetch('/prona.json')
+  .then(res => res.json())
+  .then(data => {
+    const lista = document.getElementById("lista-pronave");
+    data.forEach(prona => {
+      const div = document.createElement("div");
+      div.innerHTML = `<h3>${prona.titulli}</h3><p>${prona.pershkrimi}</p><strong>${prona.cmimi}</strong>`;
+      lista.appendChild(div);
+    });
+  });
     <p>&copy; 2025 Real Estate Explorer. All rights reserved.</p>
   </footer>
 
