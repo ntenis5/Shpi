@@ -16,12 +16,13 @@
     <form id="addPropertyForm">
       <input type="text" id="title" placeholder="Titulli" required /><br />
       <input type="text" id="location" placeholder="Vendndodhja" required /><br />
+      <input type="number" id="price" placeholder="Çmimi" required /><br />
       <textarea id="description" placeholder="Përshkrimi"></textarea><br />
       <button type="submit">Shto Pronë</button>
     </form>
 
-    <h3>Prona ekzistuese</h3>
-    <div id="admin-property-list"></div>
+    <h2>Lista e Pronave</h2>
+    <div id="propertyList"></div>
   </div>
 
   <!-- Firebase SDK -->
@@ -56,81 +57,78 @@
     auth.onAuthStateChanged(user => {
       if (user && user.email === "nteniskotsiou@gmail.com") {
         document.getElementById("adminPanel").style.display = "block";
-        loadAdminProperties();
+        loadProperties();
 
         document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
           e.preventDefault();
           const title = document.getElementById("title").value;
           const location = document.getElementById("location").value;
+          const price = Number(document.getElementById("price").value);
           const description = document.getElementById("description").value;
 
-          db.collection("prona").add({
+          db.collection("properties").add({
             title,
             location,
+            price,
             description,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          })
-          .then(() => {
+          }).then(() => {
             alert("Prona u shtua me sukses!");
             document.getElementById("addPropertyForm").reset();
-            loadAdminProperties();
-          })
-          .catch(err => alert("Gabim gjatë shtimit: " + err.message));
+            loadProperties();
+          }).catch(err => alert("Gabim gjatë shtimit: " + err.message));
         });
+
       } else if (user) {
         document.body.innerHTML = "<h3>Nuk ke të drejtë të hysh si administrator.</h3>";
       }
     });
 
-    function loadAdminProperties() {
-      const container = document.getElementById("admin-property-list");
-      container.innerHTML = "";
+    function loadProperties() {
+      const list = document.getElementById("propertyList");
+      list.innerHTML = "";
 
-      db.collection("prona").orderBy("createdAt", "desc").get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.innerHTML = `
-              <h4>${data.title}</h4>
-              <p>${data.description}</p>
-              <p><strong>${data.location}</strong></p>
-              <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', '${data.description}')">Edito</button>
-              <button onclick="deleteProperty('${doc.id}')">Fshi</button>
-              <hr>
-            `;
-            container.appendChild(div);
-          });
+      db.collection("properties").orderBy("createdAt", "desc").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <strong>${data.title}</strong> - €${data.price} - ${data.location}<br />
+            <em>${data.description}</em><br />
+            <button onclick="deleteProperty('${doc.id}')">Fshij</button>
+            <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', ${data.price}, '${data.description}')">Ndrysho</button>
+            <hr />
+          `;
+          list.appendChild(div);
         });
+      });
     }
 
     function deleteProperty(id) {
-      if (confirm("Je i sigurt që dëshiron të fshish këtë pronë?")) {
-        db.collection("prona").doc(id).delete()
-          .then(() => {
-            alert("Prona u fshi me sukses.");
-            loadAdminProperties();
-          })
-          .catch(err => alert("Gabim gjatë fshirjes: " + err.message));
+      if (confirm("A jeni i sigurt që doni të fshini këtë pronë?")) {
+        db.collection("properties").doc(id).delete().then(() => {
+          alert("Prona u fshi me sukses.");
+          loadProperties();
+        }).catch(err => alert("Gabim: " + err.message));
       }
     }
 
-    function editProperty(id, oldTitle, oldLocation, oldDescription) {
+    function editProperty(id, oldTitle, oldLocation, oldPrice, oldDescription) {
       const newTitle = prompt("Titulli i ri:", oldTitle);
       const newLocation = prompt("Vendndodhja e re:", oldLocation);
+      const newPrice = prompt("Çmimi i ri:", oldPrice);
       const newDescription = prompt("Përshkrimi i ri:", oldDescription);
 
-      if (newTitle && newLocation && newDescription) {
-        db.collection("prona").doc(id).update({
+      if (newTitle && newLocation && newPrice) {
+        db.collection("properties").doc(id).update({
           title: newTitle,
           location: newLocation,
+          price: Number(newPrice),
           description: newDescription
-        })
-        .then(() => {
-          alert("Prona u përditësua me sukses.");
-          loadAdminProperties();
-        })
-        .catch(err => alert("Gabim gjatë përditësimit: " + err.message));
+        }).then(() => {
+          alert("Prona u përditësua.");
+          loadProperties();
+        }).catch(err => alert("Gabim: " + err.message));
       }
     }
   </script>
