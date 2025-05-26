@@ -1,9 +1,8 @@
-// Import Firebase
+// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-// Firebase config
+// Firebase konfigurimi
 const firebaseConfig = {
   apiKey: "AIzaSyAdKeG2FPS85pG8pZbNf_Fg7Yh-34bZruk",
   authDomain: "shpipron.firebaseapp.com",
@@ -14,102 +13,107 @@ const firebaseConfig = {
   measurementId: "G-XYR0NH53FC"
 };
 
-// Init Firebase
+// Inicializo Firebase dhe Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
-// Shto pronë
-document.getElementById("propertyForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const title = document.getElementById("title").value;
-  const description = document.getElementById("description").value;
-  const price = document.getElementById("price").value;
-  const location = document.getElementById("location").value;
-  const imageFile = document.getElementById("image").files[0];
-
-  try {
-    const imageRef = ref(storage, "properties/" + imageFile.name);
-    await uploadBytes(imageRef, imageFile);
-    const imageUrl = await getDownloadURL(imageRef);
-
-    await addDoc(collection(db, "properties"), {
-      title,
-      description,
-      price: Number(price),
-      location,
-      imageUrl
-    });
-
-    alert("Prona u shtua me sukses!");
-    document.getElementById("propertyForm").reset();
-    loadProperties();
-  } catch (err) {
-    alert("Gabim: " + err.message);
-  }
-});
-
-// Ngarko pronat nga Firebase
-async function loadProperties() {
-  const propertyList = document.getElementById("property-list");
-  propertyList.innerHTML = "";
-
-  const querySnapshot = await getDocs(collection(db, "properties"));
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-
-    const item = document.createElement("div");
-    item.className = "property-item";
-    item.innerHTML = `
-      <h3>${data.title}</h3>
-      <img src="${data.imageUrl}" width="200" />
-      <p>${data.description}</p>
-      <p><strong>Çmimi:</strong> €${data.price}</p>
-      <p><strong>Vendndodhja:</strong> ${data.location}</p>
-    `;
-    propertyList.appendChild(item);
-
-    // Shto në hartë
-    geocodeAddress(data.location, (coords) => {
-      new google.maps.Marker({
-        position: coords,
-        map: map,
-        title: data.title
-      });
-    });
-  });
-}
-
-// Inicializo hartën
-fetch('/prona.json')
-  .then(res => res.json())
-  .then(data => {
-    const lista = document.getElementById("lista-pronave");
-    data.forEach(prona => {
-      const div = document.createElement("div");
-      div.innerHTML = `<h3>${prona.titulli}</h3><p>${prona.pershkrimi}</p><strong>${prona.cmimi}</strong>`;
-      lista.appendChild(div);
-    });
-  });
 let map;
+let markers = [];
+
+// Inicializo hartën Google Maps
 window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 41.3275, lng: 19.8189 }, // Tirana
-    zoom: 10
+    center: { lat: 41.3275, lng: 19.8189 }, // Qendra e Tiranës
+    zoom: 10,
   });
 
   loadProperties();
 };
 
-// Geocode (tekst në koordinata)
-function geocodeAddress(address, callback) {
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address }, (results, status) => {
-    if (status === "OK" && results[0]) {
-      callback(results[0].geometry.location);
-    } else {
-      console.warn("Geocode failed for: " + address);
-    }
+// Funksion për geokodim (konverton adresë në koordinata)
+function geocodeAddress(address) {
+  return new Promise((resolve, reject) => {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        resolve(results[0].geometry.location);
+      } else {
+        console.warn("Geocode dështoi për: " + address);
+        resolve(null); // nuk heq ngarkimin nëse nuk gjendet
+      }
+    });
   });
 }
+
+// Pastro markerat nga harta
+function clearMarkers() {
+  markers.forEach(m => m.setMap(null));
+  markers = [];
+}
+
+// Ngarko pronat nga Firebase dhe shfaq i filtruar
+async function loadProperties() {
+  clearMarkers();
+  const propertyList = document.getElementById("property-list");
+  propertyList.innerHTML = "";
+
+  // Merr filtrat nga inputet
+  const priceMin = parseFloat(document.getElementById("filter-price-min").value) || 0;
+  const priceMax = parseFloat(document.getElementById("filter-price-max").value) || Infinity;
+  const countryFilter = document.getElementById("filter-country").value.trim().toLowerCase();
+  const cityFilter = document.getElementById("filter-city").value.trim().toLowerCase();
+
+  // Merr të gjitha pronat nga koleksioni "properties"
+  const snapshot = await getDocs(collection(db, "properties"));
+  const properties = [];
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    properties.push({ id: doc.id, ...data });
+  });
+
+  // Filtrimi bazuar në çmim dhe vendndodhje
+  const filtered = properties.filter(p => {
+    const price = Number(p.price);
+    const loc = (p.location || "").toLowerCase();
+
+    const matchesPrice = price >= priceMin && price <= priceMax;
+    const matchesCountry = countryFilter ? loc.includes(countryFilter) : true;
+    const matchesCity = cityFilter ? loc.includes(cityFilter) : true;
+
+    return matchesPrice && matchesCountry && matchesCity;
+  });
+
+  for (const prop of filtered) {
+    // Krijo elementin në listë
+    const div = document.createElement("div");
+    div.className = "property-item";
+    div.innerHTML = `
+      <h3>${prop.title}</h3>
+      <img src="${prop.imageUrl || ''}" alt="${prop.title}" style="width:100%; max-height:200px; object-fit:cover;" />
+      <p>${prop.description || ""}</p>
+      <p><strong>Çmimi:</strong> €${prop.price}</p>
+      <p><strong>Vendndodhja:</strong> ${prop.location}</p>
+    `;
+    propertyList.appendChild(div);
+
+    // Vendos marker në hartë
+    const coords = await geocodeAddress(prop.location);
+    if (coords) {
+      const marker = new google.maps.Marker({
+        position: coords,
+        map: map,
+        title: prop.title
+      });
+      markers.push(marker);
+    }
+  }
+}
+
+// Event listener për filtrat
+document.getElementById("filter-price-min").addEventListener("input", loadProperties);
+document.getElementById("filter-price-max").addEventListener("input", loadProperties);
+document.getElementById("filter-country").addEventListener("input", loadProperties);
+document.getElementById("filter-city").addEventListener("input", loadProperties);
+
+// Mund ta zgjerosh me kategori, kërkesa për qira/shitje etj.
