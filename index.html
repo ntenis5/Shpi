@@ -2,98 +2,6 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Paneli i Administratorit</title>
-</head>
-<body>
-  <h2>Hyr si Administrator</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Fjalëkalimi" />
-  <button onclick="login()">Hyr</button>
-  <button id="logoutBtn" style="display:none;">Dil</button>
-
-  <div id="adminPanel" style="display:none">
-    <h2>Shto një pronë</h2>
-    <form id="addPropertyForm">
-      <input type="text" id="title" placeholder="Titulli" required /><br />
-      <input type="text" id="location" placeholder="Vendndodhja" required /><br />
-      <textarea id="description" placeholder="Përshkrimi"></textarea><br />
-      <button type="submit">Shto Pronë</button>
-    </form>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
-      authDomain: "shpi-df1ff.firebaseapp.com",
-      projectId: "shpi-df1ff",
-      storageBucket: "shpi-df1ff.appspot.com",
-      messagingSenderId: "983229738097",
-      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0",
-      measurementId: "G-BQNNBXMEES"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => alert("Hyrje e suksesshme!"))
-        .catch(error => alert("Gabim: " + error.message));
-    }
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      auth.signOut().then(() => {
-        alert("U ç'kyqe!");
-        location.reload();
-      });
-    });
-
-    auth.onAuthStateChanged(user => {
-      if (user && user.email === "nteniskotsiou@gmail.com") { 
-        // Vetëm admin me këtë email ka akses
-        document.getElementById("adminPanel").style.display = "block";
-        document.getElementById("logoutBtn").style.display = "inline";
-
-        document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
-          e.preventDefault();
-          const title = document.getElementById("title").value;
-          const location = document.getElementById("location").value;
-          const description = document.getElementById("description").value;
-
-          db.collection("prona").add({
-            title,
-            location,
-            description,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          })
-          .then(() => {
-            alert("Prona u shtua me sukses!");
-            document.getElementById("addPropertyForm").reset();
-          })
-          .catch(err => alert("Gabim gjatë shtimit: " + err.message));
-        });
-
-      } else if (user) {
-        document.body.innerHTML = "<h3>Nuk ke të drejtë të hysh si administrator.</h3>";
-      }
-    });
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="sq">
-<head>
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Real Estate Explorer</title>
   <link rel="stylesheet" href="styles.css" />
@@ -112,7 +20,7 @@
     <div class="category" data-category="Business">Biznes</div>
     <div class="category" data-category="Apartments">Apartamente</div>
     <div class="category" data-category="Villas">Vila</div>
-    <div class="category" data-category="Private">Private</div>
+    <div class="category" data-category="Private">Privat</div>
     <div class="category" data-category="Parcel">Parcelë</div>
     <div class="category" data-category="Parking">Parking</div>
     <div class="category" data-category="Store">Dyqan</div>
@@ -120,9 +28,9 @@
 
   <section id="filters">
     <label>Çmimi nga €<input type="number" id="filter-price-min" /></label>
-    <label>deri në €<input type="number" id="filter-price-max" /></label>
-    <label>Vendi <input type="text" id="filter-country" placeholder="p.sh. Shqipëri" /></label>
-    <label>Qyteti <input type="text" id="filter-city" placeholder="p.sh. Tiranë" /></label>
+    <label>deri €<input type="number" id="filter-price-max" /></label>
+    <label>Shteti <input type="text" id="filter-country" placeholder="psh. Shqipëri" /></label>
+    <label>Qyteti <input type="text" id="filter-city" placeholder="psh. Tiranë" /></label>
   </section>
 
   <main>
@@ -131,7 +39,7 @@
   </main>
 
   <footer>
-    <p>&copy; 2025 Real Estate Explorer. Të gjitha të drejtat të rezervuara.</p>
+    <p>&copy; 2025 Real Estate Explorer. Të gjitha të drejtat e rezervuara.</p>
   </footer>
 
   <script type="module" src="script.js"></script>
