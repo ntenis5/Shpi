@@ -82,6 +82,16 @@ async function loadProperties() {
 }
 
 // Inicializo hartën
+fetch('/prona.json')
+  .then(res => res.json())
+  .then(data => {
+    const lista = document.getElementById("lista-pronave");
+    data.forEach(prona => {
+      const div = document.createElement("div");
+      div.innerHTML = `<h3>${prona.titulli}</h3><p>${prona.pershkrimi}</p><strong>${prona.cmimi}</strong>`;
+      lista.appendChild(div);
+    });
+  });
 let map;
 window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
