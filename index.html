@@ -2,61 +2,137 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Platforma e Pronave</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paneli i Administratorit</title>
 
-  <!-- Firebase v8 (klasik) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Platforma e Pronave</h1>
-  </header>
+  <h2>Hyr si Administrator</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Fjalëkalimi" />
+  <button onclick="login()">Hyr</button>
 
-  <nav>
-    <button class="active">Të gjitha</button>
-    <button>Shitet</button>
-    <button>Qera</button>
-  </nav>
+  <div id="adminPanel" style="display:none">
+    <h2>Shto / Menaxho Pronat</h2>
 
-  <section id="categories">
-    <div class="category">Apartamente</div>
-    <div class="category">Shtëpi</div>
-    <div class="category">Tokë</div>
-    <div class="category">Zyra</div>
-  </section>
-
-  <section id="filters">
-    <label>Çmimi max: <input type="number" id="maxPrice" /></label>
-    <label>Dhoma: <input type="number" id="rooms" /></label>
-    <button id="applyFilters">Filtro</button>
-  </section>
-
-  <main>
-    <div id="property-list">
-      <!-- Prona do të ngarkohen këtu -->
-    </div>
-  </main>
-
-  <section id="add-property" style="display: none;">
-    <h2>Shto Pronë (Vetëm për Admin)</h2>
-    <form id="propertyForm">
-      <input type="text" placeholder="Titulli" required />
-      <input type="text" placeholder="Lloji" required />
-      <input type="number" placeholder="Çmimi" required />
-      <input type="number" placeholder="Dhoma" required />
-      <input type="url" placeholder="URL e imazhit" required />
-      <textarea placeholder="Përshkrimi" required></textarea>
-      <button type="submit">Shto</button>
+    <form id="addPropertyForm">
+      <input type="text" id="title" placeholder="Titulli" required /><br />
+      <input type="text" id="location" placeholder="Vendndodhja" required /><br />
+      <textarea id="description" placeholder="Përshkrimi"></textarea><br />
+      <button type="submit">Shto Pronë</button>
     </form>
-  </section>
 
-  <footer>
-    &copy; 2025 Platforma e Pronave. Të gjitha të drejtat e rezervuara.
-  </footer>
+    <h3>Lista e Pronave</h3>
+    <div id="propertyList"></div>
+  </div>
 
-  <script src="script.js"></script>
+  <script>
+    // Konfigurimi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
+      authDomain: "shpi-df1ff.firebaseapp.com",
+      projectId: "shpi-df1ff",
+      storageBucket: "shpi-df1ff.appspot.com",
+      messagingSenderId: "983229738097",
+      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0",
+      measurementId: "G-BQNNBXMEES"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Hyrja në sistem
+    function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => alert("Hyrje e suksesshme!"))
+        .catch(error => alert("Gabim: " + error.message));
+    }
+
+    // Kontroll i përdoruesit dhe ngarkimi i panelit
+    auth.onAuthStateChanged(user => {
+      if (user && user.email === "nteniskotsiou@gmail.com") {
+        document.getElementById("adminPanel").style.display = "block";
+        loadProperties();
+
+        document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
+          e.preventDefault();
+          const title = document.getElementById("title").value;
+          const location = document.getElementById("location").value;
+          const description = document.getElementById("description").value;
+
+          db.collection("prona").add({
+            title,
+            location,
+            description,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(() => {
+            alert("Prona u shtua me sukses!");
+            document.getElementById("addPropertyForm").reset();
+            loadProperties();
+          }).catch(err => alert("Gabim gjatë shtimit: " + err.message));
+        });
+
+      } else if (user) {
+        document.body.innerHTML = "<h3>Nuk ke të drejtë të hysh si administrator.</h3>";
+      }
+    });
+
+    // Ngarkimi i pronave
+    function loadProperties() {
+      const container = document.getElementById("propertyList");
+      container.innerHTML = "";
+      db.collection("prona").orderBy("createdAt", "desc").get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.innerHTML = `
+              <hr>
+              <strong>${data.title}</strong> (${data.location})<br>
+              <small>${data.description}</small><br>
+              <button onclick="deleteProperty('${doc.id}')">Fshi</button>
+              <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', '${data.description}')">Edito</button>
+            `;
+            container.appendChild(div);
+          });
+        });
+    }
+
+    // Fshirja e pronës
+    function deleteProperty(id) {
+      if (confirm("A je i sigurt?")) {
+        db.collection("prona").doc(id).delete().then(() => {
+          alert("Prona u fshi");
+          loadProperties();
+        });
+      }
+    }
+
+    // Ndryshimi i të dhënave të pronës
+    function editProperty(id, title, location, description) {
+      const newTitle = prompt("Titulli i ri", title);
+      const newLocation = prompt("Vendndodhja e re", location);
+      const newDescription = prompt("Përshkrimi i ri", description);
+
+      if (newTitle && newLocation && newDescription) {
+        db.collection("prona").doc(id).update({
+          title: newTitle,
+          location: newLocation,
+          description: newDescription
+        }).then(() => {
+          alert("Prona u ndryshua");
+          loadProperties();
+        });
+      }
+    }
+  </script>
 </body>
 </html>
