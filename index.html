@@ -2,40 +2,40 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Real Estate Explorer</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&callback=initMap" async defer></script>
 </head>
 <body>
   <header>
     <h1>Real Estate Explorer</h1>
     <nav>
-      <button id="btn-sale" class="active">Në Shitje</button>
-      <button id="btn-rent">Me Qira</button>
+      <button id="btn-sale" class="active">Shitje</button>
+      <button id="btn-rent">Qira</button>
     </nav>
   </header>
 
   <section id="categories">
     <div class="category" data-category="Business">Biznes</div>
     <div class="category" data-category="Apartments">Apartamente</div>
-    <div class="category" data-category="Villas">Villa</div>
-    <div class="category" data-category="Private">Private</div>
-    <div class="category" data-category="Parcel">Parcela</div>
+    <div class="category" data-category="Villas">Vila</div>
+    <div class="category" data-category="Private">Privat</div>
+    <div class="category" data-category="Parcel">Parcelë</div>
     <div class="category" data-category="Parking">Parking</div>
-    <div class="category" data-category="Store">Dyqane</div>
+    <div class="category" data-category="Store">Dyqan</div>
   </section>
 
   <section id="filters">
     <label>Çmimi nga €<input type="number" id="filter-price-min" /></label>
     <label>deri €<input type="number" id="filter-price-max" /></label>
-    <label>Shteti <input type="text" id="filter-country" placeholder="p.sh. Shqipëri" /></label>
-    <label>Qyteti <input type="text" id="filter-city" placeholder="p.sh. Tiranë" /></label>
+    <label>Shteti <input type="text" id="filter-country" placeholder="psh. Shqipëri" /></label>
+    <label>Qyteti <input type="text" id="filter-city" placeholder="psh. Tiranë" /></label>
   </section>
 
   <main>
     <div id="map" style="height: 400px;"></div>
-    <div id="property-list" class="property-list"></div>
+    <div id="property-list"></div>
   </main>
 
   <footer>
