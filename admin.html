@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="sq">
+<!DOCTYPE html><html lang="sq">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -9,27 +8,17 @@
   <h2>Hyr si Administrator</h2>
   <input type="email" id="email" placeholder="Email" />
   <input type="password" id="password" placeholder="Fjalëkalimi" />
-  <button onclick="login()">Hyr</button>
-
-  <div id="adminPanel" style="display:none">
-    <h2>Shto një pronë</h2>
+  <button onclick="login()">Hyr</button>  <div id="adminPanel" style="display:none">
+    <h2>Shto / Menaxho Pronat</h2>
     <form id="addPropertyForm">
       <input type="text" id="title" placeholder="Titulli" required /><br />
       <input type="text" id="location" placeholder="Vendndodhja" required /><br />
       <textarea id="description" placeholder="Përshkrimi"></textarea><br />
       <button type="submit">Shto Pronë</button>
-    </form>
+    </form><h3>Lista e Pronave</h3>
+<div id="propertyList"></div>
 
-    <h3>Prona ekzistuese</h3>
-    <div id="admin-property-list"></div>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-
-  <script>
+  </div>  <!-- Firebase SDK -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
       authDomain: "shpi-df1ff.firebaseapp.com",
@@ -56,7 +45,7 @@
     auth.onAuthStateChanged(user => {
       if (user && user.email === "nteniskotsiou@gmail.com") {
         document.getElementById("adminPanel").style.display = "block";
-        loadAdminProperties();
+        loadProperties();
 
         document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
           e.preventDefault();
@@ -73,31 +62,30 @@
           .then(() => {
             alert("Prona u shtua me sukses!");
             document.getElementById("addPropertyForm").reset();
-            loadAdminProperties();
+            loadProperties();
           })
           .catch(err => alert("Gabim gjatë shtimit: " + err.message));
         });
+
       } else if (user) {
         document.body.innerHTML = "<h3>Nuk ke të drejtë të hysh si administrator.</h3>";
       }
     });
 
-    function loadAdminProperties() {
-      const container = document.getElementById("admin-property-list");
+    function loadProperties() {
+      const container = document.getElementById("propertyList");
       container.innerHTML = "";
-
       db.collection("prona").orderBy("createdAt", "desc").get()
         .then(snapshot => {
           snapshot.forEach(doc => {
             const data = doc.data();
             const div = document.createElement("div");
             div.innerHTML = `
-              <h4>${data.title}</h4>
-              <p>${data.description}</p>
-              <p><strong>${data.location}</strong></p>
-              <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', '${data.description}')">Edito</button>
-              <button onclick="deleteProperty('${doc.id}')">Fshi</button>
               <hr>
+              <strong>${data.title}</strong> (${data.location})<br>
+              <small>${data.description}</small><br>
+              <button onclick="deleteProperty('${doc.id}')">Fshi</button>
+              <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', '${data.description}')">Edito</button>
             `;
             container.appendChild(div);
           });
@@ -105,34 +93,27 @@
     }
 
     function deleteProperty(id) {
-      if (confirm("Je i sigurt që dëshiron të fshish këtë pronë?")) {
-        db.collection("prona").doc(id).delete()
-          .then(() => {
-            alert("Prona u fshi me sukses.");
-            loadAdminProperties();
-          })
-          .catch(err => alert("Gabim gjatë fshirjes: " + err.message));
+      if (confirm("A je i sigurt?")) {
+        db.collection("prona").doc(id).delete().then(() => {
+          alert("Prona u fshi");
+          loadProperties();
+        });
       }
     }
 
-    function editProperty(id, oldTitle, oldLocation, oldDescription) {
-      const newTitle = prompt("Titulli i ri:", oldTitle);
-      const newLocation = prompt("Vendndodhja e re:", oldLocation);
-      const newDescription = prompt("Përshkrimi i ri:", oldDescription);
-
+    function editProperty(id, title, location, description) {
+      const newTitle = prompt("Titulli i ri", title);
+      const newLocation = prompt("Vendndodhja e re", location);
+      const newDescription = prompt("Përshkrimi i ri", description);
       if (newTitle && newLocation && newDescription) {
         db.collection("prona").doc(id).update({
           title: newTitle,
           location: newLocation,
           description: newDescription
-        })
-        .then(() => {
-          alert("Prona u përditësua me sukses.");
-          loadAdminProperties();
-        })
-        .catch(err => alert("Gabim gjatë përditësimit: " + err.message));
+        }).then(() => {
+          alert("Prona u ndryshua");
+          loadProperties();
+        });
       }
     }
-  </script>
-</body>
-</html>
+  </
