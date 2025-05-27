@@ -1,141 +1,81 @@
-// Import Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
-
-// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyAdKeG2FPS85pG8pZbNf_Fg7Yh-34bZruk",
-  authDomain: "shpipron.firebaseapp.com",
-  projectId: "shpipron",
-  storageBucket: "shpipron.appspot.com",
-  messagingSenderId: "42251121368",
-  appId: "1:42251121368:web:f528291f5cdbfcb87bddad",
-  measurementId: "G-XYR0NH53FC"
+  apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
+  authDomain: "shpi-df1ff.firebaseapp.com",
+  databaseURL: "https://shpi-df1ff-default-rtdb.firebaseio.com",
+  projectId: "shpi-df1ff",
+  storageBucket: "shpi-df1ff.appspot.com",
+  messagingSenderId: "983229738097",
+  appId: "1:983229738097:web:3822cf4e012755c9d6bfd0"
 };
 
-// Init Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// Shto pronë
-document.getElementById("propertyForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = document.getElementById("title").value;
-  const description = document.getElementById("description").value;
-  const price = document.getElementById("price").value;
-  const location = document.getElementById("location").value;
-  const imageFile = document.getElementById("image").files[0];
+function loadProperties() {
+  const list = document.getElementById("property-list");
+  list.innerHTML = "";
 
-  try {
-    const imageRef = ref(storage, "properties/" + imageFile.name);
-    await uploadBytes(imageRef, imageFile);
-    const imageUrl = await getDownloadURL(imageRef);
-
-    await addDoc(collection(db, "properties"), {
-      title,
-      description,
-      price: Number(price),
-      location,
-      imageUrl
+  db.ref("properties").once("value", (snapshot) => {
+    snapshot.forEach((child) => {
+      const p = child.val();
+      const item = document.createElement("div");
+      item.className = "property-item";
+      item.innerHTML = `
+        <img src="${p.image}" alt="Prona" />
+        <h3>${p.title}</h3>
+        <p><strong>Çmimi:</strong> €${p.price}</p>
+        <p><strong>Dhoma:</strong> ${p.rooms}</p>
+        <p>${p.description}</p>
+      `;
+      list.appendChild(item);
     });
+  });
+}
 
+document.getElementById("propertyForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const inputs = e.target.elements;
+  const newProperty = {
+    title: inputs[0].value,
+    type: inputs[1].value,
+    price: parseInt(inputs[2].value),
+    rooms: parseInt(inputs[3].value),
+    image: inputs[4].value,
+    description: inputs[5].value,
+  };
+
+  db.ref("properties").push(newProperty).then(() => {
     alert("Prona u shtua me sukses!");
-    document.getElementById("propertyForm").reset();
+    e.target.reset();
     loadProperties();
-  } catch (err) {
-    alert("Gabim: " + err.message);
-  }
+  });
 });
 
-// Ngarko pronat nga Firebase
-async function loadProperties() {
-  const propertyList = document.getElementById("property-list");
-  propertyList.innerHTML = "";
+document.getElementById("applyFilters").addEventListener("click", function () {
+  const maxPrice = parseInt(document.getElementById("maxPrice").value) || Infinity;
+  const rooms = parseInt(document.getElementById("rooms").value) || 0;
 
-  const querySnapshot = await getDocs(collection(db, "properties"));
-  querySnapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const id = docSnap.id;
+  db.ref("properties").once("value", (snapshot) => {
+    const list = document.getElementById("property-list");
+    list.innerHTML = "";
 
-    const item = document.createElement("div");
-    item.className = "property-item";
-    item.innerHTML = `
-      <h3>${data.title}</h3>
-      <img src="${data.imageUrl}" width="200" />
-      <p>${data.description}</p>
-      <p><strong>Çmimi:</strong> €${data.price}</p>
-      <p><strong>Vendndodhja:</strong> ${data.location}</p>
-      <button onclick="deleteProperty('${id}')">Fshij</button>
-      <button onclick="editPropertyPrompt('${id}', '${data.title}', '${data.description}', ${data.price}, '${data.location}')">Ndrysho</button>
-    `;
-    propertyList.appendChild(item);
-
-    geocodeAddress(data.location, (coords) => {
-      new google.maps.Marker({
-        position: coords,
-        map: map,
-        title: data.title
-      });
+    snapshot.forEach((child) => {
+      const p = child.val();
+      if (p.price <= maxPrice && p.rooms >= rooms) {
+        const item = document.createElement("div");
+        item.className = "property-item";
+        item.innerHTML = `
+          <img src="${p.image}" alt="Prona" />
+          <h3>${p.title}</h3>
+          <p><strong>Çmimi:</strong> €${p.price}</p>
+          <p><strong>Dhoma:</strong> ${p.rooms}</p>
+          <p>${p.description}</p>
+        `;
+        list.appendChild(item);
+      }
     });
   });
-}
+});
 
-window.deleteProperty = async function (id) {
-  if (confirm("A jeni i sigurt që doni të fshini këtë pronë?")) {
-    await deleteDoc(doc(db, "properties", id));
-    loadProperties();
-  }
-};
-
-window.editPropertyPrompt = function (id, title, description, price, location) {
-  const newTitle = prompt("Titulli i ri:", title);
-  const newDescription = prompt("Përshkrimi i ri:", description);
-  const newPrice = prompt("Çmimi i ri:", price);
-  const newLocation = prompt("Vendndodhja e re:", location);
-
-  if (newTitle && newPrice && newLocation) {
-    updateDoc(doc(db, "properties", id), {
-      title: newTitle,
-      description: newDescription,
-      price: Number(newPrice),
-      location: newLocation
-    }).then(() => loadProperties());
-  }
-};
-
-// Inicializo hartën
-let map;
-window.initMap = function () {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 41.3275, lng: 19.8189 },
-    zoom: 10
-  });
-  loadProperties();
-};
-
-// Geocode për vendndodhjen
-function geocodeAddress(address, callback) {
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address }, (results, status) => {
-    if (status === "OK" && results[0]) {
-      callback(results[0].geometry.location);
-    } else {
-      console.warn("Geocode dështoi për: " + address);
-    }
-  });
-}
+loadProperties();
