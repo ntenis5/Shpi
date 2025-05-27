@@ -1,30 +1,17 @@
 // Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
 
 // Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyAdKeG2FPS85pG8pZbNf_Fg7Yh-34bZruk",
-  authDomain: "shpipron.firebaseapp.com",
-  projectId: "shpipron",
-  storageBucket: "shpipron.appspot.com",
-  messagingSenderId: "42251121368",
-  appId: "1:42251121368:web:f528291f5cdbfcb87bddad",
-  measurementId: "G-XYR0NH53FC"
+  apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
+  authDomain: "shpi-df1ff.firebaseapp.com",
+  projectId: "shpi-df1ff",
+  storageBucket: "shpi-df1ff.appspot.com",
+  messagingSenderId: "983229738097",
+  appId: "1:983229738097:web:3822cf4e012755c9d6bfd0",
+  measurementId: "G-BQNNBXMEES"
 };
 
 // Init Firebase
@@ -32,45 +19,49 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Shto pronë
-document.getElementById("propertyForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = document.getElementById("title").value;
-  const description = document.getElementById("description").value;
-  const price = document.getElementById("price").value;
-  const location = document.getElementById("location").value;
-  const imageFile = document.getElementById("image").files[0];
+// Shto pronë (nëse forma ekziston)
+const propertyForm = document.getElementById("propertyForm");
+if (propertyForm) {
+  propertyForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
-    const imageRef = ref(storage, "properties/" + imageFile.name);
-    await uploadBytes(imageRef, imageFile);
-    const imageUrl = await getDownloadURL(imageRef);
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+    const price = document.getElementById("price").value;
+    const location = document.getElementById("location").value;
+    const imageFile = document.getElementById("image").files[0];
 
-    await addDoc(collection(db, "properties"), {
-      title,
-      description,
-      price: Number(price),
-      location,
-      imageUrl
-    });
+    try {
+      const imageRef = ref(storage, "properties/" + imageFile.name);
+      await uploadBytes(imageRef, imageFile);
+      const imageUrl = await getDownloadURL(imageRef);
 
-    alert("Prona u shtua me sukses!");
-    document.getElementById("propertyForm").reset();
-    loadProperties();
-  } catch (err) {
-    alert("Gabim: " + err.message);
-  }
-});
+      await addDoc(collection(db, "properties"), {
+        title,
+        description,
+        price: Number(price),
+        location,
+        imageUrl
+      });
 
-// Ngarko pronat nga Firebase
+      alert("Prona u shtua me sukses!");
+      propertyForm.reset();
+      loadProperties();
+    } catch (err) {
+      alert("Gabim: " + err.message);
+    }
+  });
+}
+
+// Ngarko pronat
 async function loadProperties() {
   const propertyList = document.getElementById("property-list");
+  if (!propertyList) return;
   propertyList.innerHTML = "";
 
   const querySnapshot = await getDocs(collection(db, "properties"));
-  querySnapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const id = docSnap.id;
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
 
     const item = document.createElement("div");
     item.className = "property-item";
@@ -80,11 +71,10 @@ async function loadProperties() {
       <p>${data.description}</p>
       <p><strong>Çmimi:</strong> €${data.price}</p>
       <p><strong>Vendndodhja:</strong> ${data.location}</p>
-      <button onclick="deleteProperty('${id}')">Fshij</button>
-      <button onclick="editPropertyPrompt('${id}', '${data.title}', '${data.description}', ${data.price}, '${data.location}')">Ndrysho</button>
     `;
     propertyList.appendChild(item);
 
+    // Shto në hartë
     geocodeAddress(data.location, (coords) => {
       new google.maps.Marker({
         position: coords,
@@ -95,40 +85,18 @@ async function loadProperties() {
   });
 }
 
-window.deleteProperty = async function (id) {
-  if (confirm("A jeni i sigurt që doni të fshini këtë pronë?")) {
-    await deleteDoc(doc(db, "properties", id));
-    loadProperties();
-  }
-};
-
-window.editPropertyPrompt = function (id, title, description, price, location) {
-  const newTitle = prompt("Titulli i ri:", title);
-  const newDescription = prompt("Përshkrimi i ri:", description);
-  const newPrice = prompt("Çmimi i ri:", price);
-  const newLocation = prompt("Vendndodhja e re:", location);
-
-  if (newTitle && newPrice && newLocation) {
-    updateDoc(doc(db, "properties", id), {
-      title: newTitle,
-      description: newDescription,
-      price: Number(newPrice),
-      location: newLocation
-    }).then(() => loadProperties());
-  }
-};
-
 // Inicializo hartën
 let map;
 window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 41.3275, lng: 19.8189 },
+    center: { lat: 41.3275, lng: 19.8189 }, // Tirana
     zoom: 10
   });
+
   loadProperties();
 };
 
-// Geocode për vendndodhjen
+// Geocode (tekst në koordinata)
 function geocodeAddress(address, callback) {
   const geocoder = new google.maps.Geocoder();
   geocoder.geocode({ address }, (results, status) => {
