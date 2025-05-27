@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Paneli i Administratorit</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <h2>Hyr si Administrator</h2>
@@ -12,16 +13,16 @@
   <button onclick="login()">Hyr</button>
 
   <div id="adminPanel" style="display:none">
-    <h2>Shto një pronë</h2>
+    <h2>Shto / Ndrysho Pronë</h2>
     <form id="addPropertyForm">
+      <input type="hidden" id="propertyId" />
       <input type="text" id="title" placeholder="Titulli" required /><br />
       <input type="text" id="location" placeholder="Vendndodhja" required /><br />
-      <input type="number" id="price" placeholder="Çmimi" required /><br />
       <textarea id="description" placeholder="Përshkrimi"></textarea><br />
-      <button type="submit">Shto Pronë</button>
+      <button type="submit">Ruaj Pronë</button>
     </form>
 
-    <h2>Lista e Pronave</h2>
+    <h3>Lista e Pronave</h3>
     <div id="propertyList"></div>
   </div>
 
@@ -59,76 +60,68 @@
         document.getElementById("adminPanel").style.display = "block";
         loadProperties();
 
-        document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
+        document.getElementById("addPropertyForm").addEventListener("submit", async function(e) {
           e.preventDefault();
+          const id = document.getElementById("propertyId").value;
           const title = document.getElementById("title").value;
           const location = document.getElementById("location").value;
-          const price = Number(document.getElementById("price").value);
           const description = document.getElementById("description").value;
 
-          db.collection("properties").add({
-            title,
-            location,
-            price,
-            description,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            alert("Prona u shtua me sukses!");
-            document.getElementById("addPropertyForm").reset();
-            loadProperties();
-          }).catch(err => alert("Gabim gjatë shtimit: " + err.message));
-        });
+          if (id) {
+            // update
+            await db.collection("prona").doc(id).update({ title, location, description });
+            alert("Prona u përditësua!");
+          } else {
+            // create
+            await db.collection("prona").add({
+              title,
+              location,
+              description,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("Prona u shtua!");
+          }
 
+          document.getElementById("addPropertyForm").reset();
+          document.getElementById("propertyId").value = "";
+          loadProperties();
+        });
       } else if (user) {
         document.body.innerHTML = "<h3>Nuk ke të drejtë të hysh si administrator.</h3>";
       }
     });
 
-    function loadProperties() {
-      const list = document.getElementById("propertyList");
-      list.innerHTML = "";
-
-      db.collection("properties").orderBy("createdAt", "desc").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const div = document.createElement("div");
-          div.innerHTML = `
-            <strong>${data.title}</strong> - €${data.price} - ${data.location}<br />
-            <em>${data.description}</em><br />
-            <button onclick="deleteProperty('${doc.id}')">Fshij</button>
-            <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', ${data.price}, '${data.description}')">Ndrysho</button>
-            <hr />
-          `;
-          list.appendChild(div);
-        });
+    async function loadProperties() {
+      const container = document.getElementById("propertyList");
+      container.innerHTML = "";
+      const snapshot = await db.collection("prona").orderBy("createdAt", "desc").get();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <strong>${data.title}</strong><br />
+          ${data.location}<br />
+          ${data.description}<br />
+          <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', \`${data.description}\`)">Edito</button>
+          <button onclick="deleteProperty('${doc.id}')">Fshij</button>
+          <hr />
+        `;
+        container.appendChild(div);
       });
     }
 
-    function deleteProperty(id) {
-      if (confirm("A jeni i sigurt që doni të fshini këtë pronë?")) {
-        db.collection("properties").doc(id).delete().then(() => {
-          alert("Prona u fshi me sukses.");
-          loadProperties();
-        }).catch(err => alert("Gabim: " + err.message));
-      }
+    function editProperty(id, title, location, description) {
+      document.getElementById("propertyId").value = id;
+      document.getElementById("title").value = title;
+      document.getElementById("location").value = location;
+      document.getElementById("description").value = description;
     }
 
-    function editProperty(id, oldTitle, oldLocation, oldPrice, oldDescription) {
-      const newTitle = prompt("Titulli i ri:", oldTitle);
-      const newLocation = prompt("Vendndodhja e re:", oldLocation);
-      const newPrice = prompt("Çmimi i ri:", oldPrice);
-      const newDescription = prompt("Përshkrimi i ri:", oldDescription);
-
-      if (newTitle && newLocation && newPrice) {
-        db.collection("properties").doc(id).update({
-          title: newTitle,
-          location: newLocation,
-          price: Number(newPrice),
-          description: newDescription
-        }).then(() => {
-          alert("Prona u përditësua.");
-          loadProperties();
-        }).catch(err => alert("Gabim: " + err.message));
+    async function deleteProperty(id) {
+      if (confirm("A je i sigurt që do ta fshish këtë pronë?")) {
+        await db.collection("prona").doc(id).delete();
+        alert("Prona u fshi!");
+        loadProperties();
       }
     }
   </script>
