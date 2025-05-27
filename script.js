@@ -1,7 +1,7 @@
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
   authDomain: "shpi-df1ff.firebaseapp.com",
-  databaseURL: "https://shpi-df1ff-default-rtdb.firebaseio.com",
   projectId: "shpi-df1ff",
   storageBucket: "shpi-df1ff.appspot.com",
   messagingSenderId: "983229738097",
@@ -9,73 +9,85 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db = firebase.firestore();
 
-function loadProperties() {
-  const list = document.getElementById("property-list");
-  list.innerHTML = "";
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  db.ref("properties").once("value", (snapshot) => {
-    snapshot.forEach((child) => {
-      const p = child.val();
-      const item = document.createElement("div");
-      item.className = "property-item";
-      item.innerHTML = `
-        <img src="${p.image}" alt="Prona" />
-        <h3>${p.title}</h3>
-        <p><strong>Çmimi:</strong> €${p.price}</p>
-        <p><strong>Dhoma:</strong> ${p.rooms}</p>
-        <p>${p.description}</p>
-      `;
-      list.appendChild(item);
-    });
-  });
+  const adminEmail = "nteniskotsiou@gmail.com";
+  const adminPassword = "28Qershor1997";
+
+  if (email === adminEmail && password === adminPassword) {
+    alert("Hyrje e suksesshme!");
+    document.getElementById("adminPanel").style.display = "block";
+    loadProperties();
+  } else {
+    alert("Email ose fjalëkalim i pasaktë.");
+  }
 }
 
-document.getElementById("propertyForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+function loadProperties() {
+  const container = document.getElementById("propertyList");
+  container.innerHTML = "";
 
-  const inputs = e.target.elements;
-  const newProperty = {
-    title: inputs[0].value,
-    type: inputs[1].value,
-    price: parseInt(inputs[2].value),
-    rooms: parseInt(inputs[3].value),
-    image: inputs[4].value,
-    description: inputs[5].value,
-  };
-
-  db.ref("properties").push(newProperty).then(() => {
-    alert("Prona u shtua me sukses!");
-    e.target.reset();
-    loadProperties();
-  });
-});
-
-document.getElementById("applyFilters").addEventListener("click", function () {
-  const maxPrice = parseInt(document.getElementById("maxPrice").value) || Infinity;
-  const rooms = parseInt(document.getElementById("rooms").value) || 0;
-
-  db.ref("properties").once("value", (snapshot) => {
-    const list = document.getElementById("property-list");
-    list.innerHTML = "";
-
-    snapshot.forEach((child) => {
-      const p = child.val();
-      if (p.price <= maxPrice && p.rooms >= rooms) {
-        const item = document.createElement("div");
-        item.className = "property-item";
-        item.innerHTML = `
-          <img src="${p.image}" alt="Prona" />
-          <h3>${p.title}</h3>
-          <p><strong>Çmimi:</strong> €${p.price}</p>
-          <p><strong>Dhoma:</strong> ${p.rooms}</p>
-          <p>${p.description}</p>
+  db.collection("prona").orderBy("createdAt", "desc").get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <strong>${data.title}</strong> (${data.location})<br>
+          <p>${data.description}</p>
+          <button onclick="deleteProperty('${doc.id}')">Fshi</button>
+          <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', \`${data.description}\`)">Edito</button>
         `;
-        list.appendChild(item);
-      }
+        container.appendChild(div);
+      });
     });
-  });
+}
+
+document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const title = document.getElementById("title").value;
+  const location = document.getElementById("location").value;
+  const description = document.getElementById("description").value;
+
+  db.collection("prona").add({
+    title,
+    location,
+    description,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    alert("Prona u shtua me sukses!");
+    document.getElementById("addPropertyForm").reset();
+    loadProperties();
+  })
+  .catch(err => alert("Gabim gjatë shtimit: " + err.message));
 });
 
-loadProperties();
+function deleteProperty(id) {
+  if (confirm("A je i sigurt që do ta fshish këtë pronë?")) {
+    db.collection("prona").doc(id).delete().then(() => {
+      alert("Prona u fshi.");
+      loadProperties();
+    });
+  }
+}
+
+function editProperty(id, title, location, description) {
+  const newTitle = prompt("Titulli i ri", title);
+  const newLocation = prompt("Vendndodhja e re", location);
+  const newDescription = prompt("Përshkrimi i ri", description);
+  if (newTitle && newLocation && newDescription) {
+    db.collection("prona").doc(id).update({
+      title: newTitle,
+      location: newLocation,
+      description: newDescription
+    }).then(() => {
+      alert("Prona u përditësua.");
+      loadProperties();
+    });
+  }
+}
