@@ -2,163 +2,90 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Paneli i Administratorit</title>
-
-  <!-- Firebase SDK për Firestore -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prona - Shiko & Filtro</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      background-color: #f5f5f5;
-    }
-    h2 {
-      color: #0066cc;
-    }
-    input, textarea {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      width: 100%;
-      max-width: 400px;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    #propertyList div {
-      background: #fff;
-      margin: 1rem 0;
-      padding: 1rem;
-      border-left: 4px solid #0066cc;
-    }
+    body { font-family: Arial, sans-serif; padding: 1rem; background: #f5f5f5; }
+    #filters { margin-bottom: 1rem; }
+    #property-list { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 1rem; }
+    .property-item { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
 
-  <h2>Hyr si Administrator</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Fjalëkalimi" />
-  <button onclick="login()">Hyr</button>
+<h1>Prona në Shitje / Qira</h1>
 
-  <div id="adminPanel" style="display:none;">
-    <h2>Shto / Menaxho Pronat</h2>
-    <form id="addPropertyForm">
-      <input type="text" id="title" placeholder="Titulli" required /><br />
-      <input type="text" id="location" placeholder="Vendndodhja" required /><br />
-      <textarea id="description" placeholder="Përshkrimi"></textarea><br />
-      <button type="submit">Shto Pronë</button>
-    </form>
+<div id="filters">
+  <input type="text" id="searchTitle" placeholder="Kërko sipas titullit..." />
+  <input type="text" id="searchLocation" placeholder="Kërko sipas vendndodhjes..." />
+  <button onclick="filterProperties()">Filtro</button>
+  <button onclick="loadProperties()">Pastro Filtrat</button>
+</div>
 
-    <h3>Lista e Pronave</h3>
-    <div id="propertyList"></div>
-  </div>
+<div id="property-list"></div>
 
-  <script>
-    // Konfigurimi i Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
-      authDomain: "shpi-df1ff.firebaseapp.com",
-      projectId: "shpi-df1ff",
-      storageBucket: "shpi-df1ff.appspot.com",
-      messagingSenderId: "983229738097",
-      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0"
-    };
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
+    authDomain: "shpi-df1ff.firebaseapp.com",
+    projectId: "shpi-df1ff",
+    storageBucket: "shpi-df1ff.appspot.com",
+    messagingSenderId: "983229738097",
+    appId: "1:983229738097:web:3822cf4e012755c9d6bfd0"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  const propertyList = document.getElementById('property-list');
 
-      const adminEmail = "nteniskotsiou@gmail.com";
-      const adminPassword = "28Qershor1997";
-
-      if (email === adminEmail && password === adminPassword) {
-        alert("Hyrje e suksesshme!");
-        document.getElementById("adminPanel").style.display = "block";
-        loadProperties();
-      } else {
-        alert("Email ose fjalëkalim i pasaktë.");
-      }
+  function renderProperties(properties) {
+    propertyList.innerHTML = '';
+    if (properties.length === 0) {
+      propertyList.innerHTML = '<p>Nuk u gjetën prona.</p>';
+      return;
     }
-
-    // Ngarko pronat nga Firestore
-    function loadProperties() {
-      const container = document.getElementById("propertyList");
-      container.innerHTML = "";
-
-      db.collection("prona").orderBy("createdAt", "desc").get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.innerHTML = `
-              <strong>${data.title}</strong> (${data.location})<br>
-              <p>${data.description}</p>
-              <button onclick="deleteProperty('${doc.id}')">Fshi</button>
-              <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', \`${data.description}\`)">Edito</button>
-            `;
-            container.appendChild(div);
-          });
-        });
-    }
-
-    // Shto pronë të re
-    document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const title = document.getElementById("title").value;
-      const location = document.getElementById("location").value;
-      const description = document.getElementById("description").value;
-
-      db.collection("prona").add({
-        title,
-        location,
-        description,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      })
-      .then(() => {
-        alert("Prona u shtua me sukses!");
-        document.getElementById("addPropertyForm").reset();
-        loadProperties();
-      })
-      .catch(err => alert("Gabim gjatë shtimit: " + err.message));
+    properties.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement('div');
+      div.className = 'property-item';
+      div.innerHTML = `
+        <h3>${data.title}</h3>
+        <p><strong>Vendndodhja:</strong> ${data.location}</p>
+        <p>${data.description}</p>
+      `;
+      propertyList.appendChild(div);
     });
+  }
 
-    // Fshi pronë
-    function deleteProperty(id) {
-      if (confirm("A je i sigurt që do ta fshish këtë pronë?")) {
-        db.collection("prona").doc(id).delete().then(() => {
-          alert("Prona u fshi.");
-          loadProperties();
-        });
-      }
-    }
+  function loadProperties() {
+    db.collection("prona").orderBy("createdAt", "desc").get()
+      .then(snapshot => {
+        renderProperties(snapshot.docs);
+      });
+  }
 
-    // Edito pronë
-    function editProperty(id, title, location, description) {
-      const newTitle = prompt("Titulli i ri", title);
-      const newLocation = prompt("Vendndodhja e re", location);
-      const newDescription = prompt("Përshkrimi i ri", description);
-      if (newTitle && newLocation && newDescription) {
-        db.collection("prona").doc(id).update({
-          title: newTitle,
-          location: newLocation,
-          description: newDescription
-        }).then(() => {
-          alert("Prona u përditësua.");
-          loadProperties();
+  function filterProperties() {
+    const titleFilter = document.getElementById('searchTitle').value.toLowerCase();
+    const locationFilter = document.getElementById('searchLocation').value.toLowerCase();
+
+    db.collection("prona").orderBy("createdAt", "desc").get()
+      .then(snapshot => {
+        const filtered = snapshot.docs.filter(doc => {
+          const data = doc.data();
+          const matchesTitle = data.title.toLowerCase().includes(titleFilter);
+          const matchesLocation = data.location.toLowerCase().includes(locationFilter);
+          return matchesTitle && matchesLocation;
         });
-      }
-    }
-  </script>
+        renderProperties(filtered);
+      });
+  }
+
+  // Load properties on page load
+  loadProperties();
+</script>
+
 </body>
 </html>
