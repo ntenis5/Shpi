@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Paneli i Administratorit</title>
+  <link rel="stylesheet" href="style.css" />
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
@@ -18,7 +19,6 @@
 
   <div id="adminPanel" style="display:none">
     <h2>Shto / Menaxho Pronat</h2>
-
     <form id="addPropertyForm">
       <input type="text" id="title" placeholder="Titulli" required /><br />
       <input type="text" id="location" placeholder="Vendndodhja" required /><br />
@@ -31,22 +31,19 @@
   </div>
 
   <script>
-    // Konfigurimi Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
       authDomain: "shpi-df1ff.firebaseapp.com",
       projectId: "shpi-df1ff",
       storageBucket: "shpi-df1ff.appspot.com",
       messagingSenderId: "983229738097",
-      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0",
-      measurementId: "G-BQNNBXMEES"
+      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0"
     };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Hyrja në sistem
     function login() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -56,7 +53,6 @@
         .catch(error => alert("Gabim: " + error.message));
     }
 
-    // Kontroll i përdoruesit dhe ngarkimi i panelit
     auth.onAuthStateChanged(user => {
       if (user && user.email === "nteniskotsiou@gmail.com") {
         document.getElementById("adminPanel").style.display = "block";
@@ -73,11 +69,13 @@
             location,
             description,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
+          })
+          .then(() => {
             alert("Prona u shtua me sukses!");
             document.getElementById("addPropertyForm").reset();
             loadProperties();
-          }).catch(err => alert("Gabim gjatë shtimit: " + err.message));
+          })
+          .catch(err => alert("Gabim gjatë shtimit: " + err.message));
         });
 
       } else if (user) {
@@ -85,7 +83,6 @@
       }
     });
 
-    // Ngarkimi i pronave
     function loadProperties() {
       const container = document.getElementById("propertyList");
       container.innerHTML = "";
@@ -106,7 +103,6 @@
         });
     }
 
-    // Fshirja e pronës
     function deleteProperty(id) {
       if (confirm("A je i sigurt?")) {
         db.collection("prona").doc(id).delete().then(() => {
@@ -116,12 +112,10 @@
       }
     }
 
-    // Ndryshimi i të dhënave të pronës
     function editProperty(id, title, location, description) {
       const newTitle = prompt("Titulli i ri", title);
       const newLocation = prompt("Vendndodhja e re", location);
       const newDescription = prompt("Përshkrimi i ri", description);
-
       if (newTitle && newLocation && newDescription) {
         db.collection("prona").doc(id).update({
           title: newTitle,
