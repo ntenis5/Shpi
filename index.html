@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="sq">
+<!DOCTYPE html><html lang="sq">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -11,167 +10,102 @@
       background-color: #000;
       color: white;
       overflow: hidden;
-    }
+    }#globeViz {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+}
 
-    #globeViz {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 0;
-    }
+.top-bar {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 4;
+}
 
-    .panel, .login {
-      position: absolute;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 15px;
-      border-radius: 10px;
-      border: 1px solid white;
-      z-index: 3;
-    }
+.top-bar button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .login {
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-    }
+#categoryCircle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 350px;
+  height: 350px;
+  margin: -175px 0 0 -175px;
+  border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
+}
 
-    .panel {
-      bottom: 80px; 
-      right: 20px;
-      width: 200px;
-    }
+#categoryCircle .orbit-button {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid white;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  pointer-events: auto;
+  text-align: center;
+  line-height: 1.2;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
 
-    input, button {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-      font-size: 14px;
-    }
+#categoryCircle .orbit-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
 
-    button {
-      background-color: white;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #ddd;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    #adminButton {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 24px;
-      border-radius: 10px;
-      background: white;
-      color: black;
-      font-weight: bold;
-      z-index: 4;
-      cursor: pointer;
-      border: none;
-    }
   </style>
 </head>
 <body>
+  <div id="globeViz"></div>  <!-- TOP BUTTONS -->  <div class="top-bar">
+    <button style="background: green; color: white;" onclick="filterByType('sale')">SALE</button>
+    <button style="background: white; color: black;" onclick="toggleSearch()">SEARCH</button>
+    <button style="background: blue; color: white;" onclick="filterByType('rent')">RENT</button>
+  </div>  <!-- CATEGORY CIRCLE -->  <div id="categoryCircle">
+    <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+    <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+    <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+    <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+    <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+    <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+    <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+  </div>  <script>
+    const orbitButtons = document.querySelectorAll('#categoryCircle .orbit-button');
+    const radius = 140;
+    orbitButtons.forEach((btn, i) => {
+      const angle = (i / orbitButtons.length) * 2 * Math.PI;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      btn.style.left = `${175 + x - 40}px`;
+      btn.style.top = `${175 + y - 40}px`;
+    });
 
-<!-- GLOBI -->
-<div id="globeViz"></div>
-
-<!-- BUTONI ADMIN -->
-<button onclick="showLogin()" id="adminButton">Admin</button>
-
-<!-- LOGIN MODAL -->
-<div class="login hidden" id="loginModal">
-  <h3>Admin Login</h3>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Hyr</button>
-  <p id="loginError" style="color:red;"></p>
-</div>
-
-<!-- PANELI I ADMINIT -->
-<div class="panel hidden" id="adminPanel">
-  <h3>Shto Pronë</h3>
-  <input type="text" id="new-category" placeholder="Kategoria">
-  <input type="text" id="new-city" placeholder="Qyteti/Shteti">
-  <input type="number" id="new-price" placeholder="Çmimi">
-  <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
-  <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
-  <button onclick="addProperty()">Publiko</button>
-  <button onclick="logout()">Dil</button>
-</div>
-
-<!-- SCRIPTET -->
-<script src="https://unpkg.com/three"></script>
-<script src="https://unpkg.com/globe.gl"></script>
-<script>
-  const globe = Globe()(document.getElementById('globeViz'))
-    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-    .backgroundColor('#000')
-    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
-
-  const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
-
-  const adminUser = "admin";
-  const adminPass = "123456";
-
-  function showLogin() {
-    document.getElementById("loginModal").classList.remove("hidden");
-  }
-
-  function login() {
-    const u = document.getElementById("username").value;
-    const p = document.getElementById("password").value;
-    if (u === adminUser && p === adminPass) {
-      document.getElementById("loginModal").classList.add("hidden");
-      document.getElementById("adminPanel").classList.remove("hidden");
-      document.getElementById("adminButton").classList.add("hidden");
-    } else {
-      document.getElementById("loginError").textContent = "Të dhëna të pasakta.";
-    }
-  }
-
-  function logout() {
-    document.getElementById("adminPanel").classList.add("hidden");
-    document.getElementById("adminButton").classList.remove("hidden");
-  }
-
-  function addProperty() {
-    const category = document.getElementById("new-category").value;
-    const city = document.getElementById("new-city").value;
-    const price = parseFloat(document.getElementById("new-price").value);
-    const lat = parseFloat(document.getElementById("new-lat").value);
-    const lng = parseFloat(document.getElementById("new-lng").value);
-
-    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-      alert("Plotëso të gjitha fushat.");
-      return;
+    function filterByCategory(cat) {
+      alert(`Filtrim për kategorinë: ${cat}`);
     }
 
-    const newProp = { category, city, price, lat, lng };
-    propertyData.push(newProp);
-    localStorage.setItem("properties", JSON.stringify(propertyData));
-    renderPoints(propertyData);
-    alert("Prona u publikua!");
-  }
+    function filterByType(type) {
+      alert(`Filtrim për tipin: ${type}`);
+    }
 
-  function renderPoints(data) {
-    globe.pointsData(data)
-      .pointLat(d => d.lat)
-      .pointLng(d => d.lng)
-      .pointAltitude(0.05)
-      .pointColor(() => 'orange')
-      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
-  }
-
-  renderPoints(propertyData);
-</script>
-</body>
+    function toggleSearch() {
+      alert("Shfaq ose fsheh filtrat e avancuara këtu.");
+    }
+  </script></body>
 </html>
