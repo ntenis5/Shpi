@@ -23,12 +23,65 @@
     button, input, select {
       border-radius: 6px;
       border: none;
-      padding: 8px;
+      padding: 6px;
       margin-bottom: 10px;
       width: 100%;
     }
 
-    /* PANELI I ADMIN */
+    /* Butoni Search në qendër sipër */
+    #searchToggle {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      background: white;
+      color: black;
+      padding: 4px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: auto;
+      font-weight: bold;
+    }
+
+    /* Paneli i filtrave */
+    #filterPanel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      padding: 15px;
+      border: 1px solid white;
+      border-radius: 10px;
+      z-index: 4;
+      width: 300px;
+    }
+
+    /* Butonët Sale & Rent */
+    #saleBtn, #rentBtn {
+      position: absolute;
+      top: 10px;
+      background: white;
+      color: black;
+      padding: 4px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      z-index: 3;
+    }
+
+    #saleBtn {
+      left: 10px;
+    }
+
+    #rentBtn {
+      right: 10px;
+    }
+
+    /* Admin */
     #adminToggle {
       position: absolute;
       bottom: 10px;
@@ -55,55 +108,6 @@
       border-radius: 10px;
       z-index: 4;
       width: 250px;
-    }
-
-    /* PANELI I KËRKIMIT */
-    #searchToggle {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3;
-      background: white;
-      color: black;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #filterPanel {
-      display: none;
-      position: absolute;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      padding: 15px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 300px;
-    }
-
-    /* Butonët Sale & Rent */
-    #saleBtn, #rentBtn {
-      position: absolute;
-      top: 10px;
-      background: white;
-      color: black;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      z-index: 3;
-    }
-
-    #saleBtn {
-      left: 10px;
-    }
-
-    #rentBtn {
-      right: 10px;
     }
 
     #categoryCircle {
@@ -143,12 +147,12 @@
 
 <div id="globeViz"></div>
 
-<!-- Butonat lart -->
+<!-- Butonat sipër -->
 <button id="saleBtn">Sale</button>
-<button id="rentBtn">Rent</button>
 <button id="searchToggle">Search</button>
+<button id="rentBtn">Rent</button>
 
-<!-- Paneli i kërkimit -->
+<!-- Paneli i filtrave -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -162,7 +166,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli i adminit -->
+<!-- Paneli admin -->
 <button id="adminToggle">Admin</button>
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
@@ -185,7 +189,7 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- SCRIPTET -->
+<!-- Scriptet -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
