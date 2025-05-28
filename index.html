@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prona në Glob</title>
   <style>
     body {
@@ -15,70 +15,232 @@
 
     #globeViz {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       z-index: 0;
     }
 
-    .orbit-button {
+    .panel, .login, .filter {
       position: absolute;
-      background-color: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid white;
+      z-index: 2;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .login {
+      bottom: 10px;
+      right: 10px;
+      transform: none;
+    }
+
+    .filter {
+      top: 10px;
+      left: 10px;
+    }
+
+    .panel {
+      bottom: 10px;
+      right: 10px;
+      display: none;
+    }
+
+    input, select, button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #categoryCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 300px;
+      margin: -150px 0 0 -150px;
+      border-radius: 50%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #categoryCircle .orbit-button {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
       border: 1px solid white;
       border-radius: 50%;
-      padding: 10px 14px;
-      color: white;
+      width: 70px;
+      height: 70px;
+      pointer-events: auto;
+      text-align: center;
+      line-height: 1.2;
+      font-size: 13px;
       cursor: pointer;
       transition: background 0.3s;
     }
-    .orbit-button:hover {
+
+    #categoryCircle .orbit-button:hover {
       background-color: rgba(255, 255, 255, 0.3);
     }
-
-    #top-left, #top-right, #bottom-left, #bottom-right {
-      position: absolute;
-      padding: 10px;
-      font-weight: bold;
-    }
-    #top-left { top: 10px; left: 10px; }
-    #top-right { top: 10px; right: 10px; }
-    #bottom-left { bottom: 10px; left: 10px; }
-    #bottom-right { bottom: 10px; right: 10px; }
   </style>
 </head>
 <body>
-  <div id="globeViz"></div>
 
-  <div id="top-left">SALE</div>
-  <div id="top-right">RENT</div>
-  <div id="bottom-left">Çmimi</div>
-  <div id="bottom-right">Qyteti/Shteti</div>
+<div id="globeViz"></div>
 
-  <!-- Orbit buttons -->
-  <div class="orbit-button" style="top: 50%; left: 10%;">Shtëpi</div>
-  <div class="orbit-button" style="top: 20%; left: 40%;">Vilë</div>
-  <div class="orbit-button" style="top: 30%; right: 30%;">Apartament</div>
-  <div class="orbit-button" style="bottom: 30%; left: 30%;">Magazinë</div>
-  <div class="orbit-button" style="bottom: 40%; right: 20%;">Kapanon</div>
-  <div class="orbit-button" style="top: 60%; right: 10%;">Parking</div>
-  <div class="orbit-button" style="bottom: 10%; left: 50%;">Parcelë</div>
+<!-- KATEGORITË RRETH GLOBIT -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
 
-  <!-- Globe.gl library -->
-  <script src="https://unpkg.com/three"></script>
-  <script src="https://unpkg.com/globe.gl"></script>
-  <script>
-    const world = Globe()(document.getElementById('globeViz'))
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .backgroundColor('#000')
-      .pointOfView({ lat: 20, lng: 0, altitude: 2 });
+<!-- FILTRA -->
+<div class="filter">
+  <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
+  <input type="text" id="filter-city" placeholder="Qyteti/Shteti">
+  <input type="number" id="filter-price" placeholder="Çmimi max">
+  <button onclick="applyFilters()">Kërko</button>
+</div>
 
-    // Placeholder click event
-    document.querySelectorAll('.orbit-button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Kategoria: ' + btn.textContent);
-      });
+<!-- PANELI I ADMINIT -->
+<div class="panel" id="adminPanel">
+  <h3>Shto Pronë</h3>
+  <input type="text" id="new-category" placeholder="Kategoria">
+  <input type="text" id="new-city" placeholder="Qyteti/Shteti">
+  <input type="number" id="new-price" placeholder="Çmimi">
+  <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
+  <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
+  <button onclick="addProperty()">Publiko</button>
+  <button onclick="logout()">Dil</button>
+</div>
+
+<!-- LOGIN -->
+<div class="login" id="loginModal">
+  <h3>Admin Login</h3>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Hyr</button>
+  <p id="loginError" style="color:red;"></p>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/globe.gl"></script>
+<script>
+  const globe = Globe()(document.getElementById('globeViz'))
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .backgroundColor('#000')
+    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
+
+  const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
+
+  const adminUser = "admin";
+  const adminPass = "123456";
+
+  function login() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    if (u === adminUser && p === adminPass) {
+      document.getElementById("loginModal").classList.add("hidden");
+      document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("loginError").textContent = "";
+    } else {
+      document.getElementById("loginError").textContent = "Të dhëna të pasakta.";
+    }
+  }
+
+  function logout() {
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("loginModal").classList.remove("hidden");
+  }
+
+  function addProperty() {
+    const category = document.getElementById("new-category").value;
+    const city = document.getElementById("new-city").value;
+    const price = parseFloat(document.getElementById("new-price").value);
+    const lat = parseFloat(document.getElementById("new-lat").value);
+    const lng = parseFloat(document.getElementById("new-lng").value);
+
+    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+      alert("Plotëso të gjitha fushat.");
+      return;
+    }
+
+    const newProp = { category, city, price, lat, lng };
+    propertyData.push(newProp);
+    localStorage.setItem("properties", JSON.stringify(propertyData));
+    renderPoints(propertyData);
+    alert("Prona u publikua!");
+  }
+
+  function renderPoints(data) {
+    globe.pointsData(data)
+      .pointLat(d => d.lat)
+      .pointLng(d => d.lng)
+      .pointAltitude(0.05)
+      .pointColor(() => 'orange')
+      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
+    
+    updateCategoryFilter(data);
+  }
+
+  function applyFilters() {
+    const fCategory = document.getElementById("filter-category").value.toLowerCase();
+    const fCity = document.getElementById("filter-city").value.toLowerCase();
+    const fPrice = parseFloat(document.getElementById("filter-price").value);
+
+    const filtered = propertyData.filter(p => {
+      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
+             (!fCity || p.city.toLowerCase().includes(fCity)) &&
+             (!fPrice || p.price <= fPrice);
     });
-  </script>
+
+    renderPoints(filtered);
+  }
+
+  function updateCategoryFilter(data) {
+    const categories = [...new Set(data.map(p => p.category))];
+    const select = document.getElementById("filter-category");
+    select.innerHTML = '<option value="">Të gjitha kategoritë</option>';
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      select.appendChild(opt);
+    });
+  }
+
+  function filterByCategory(cat) {
+    document.getElementById("filter-category").value = cat;
+    applyFilters();
+  }
+
+  // Rregullo pozicionet e butonave në formë rrethi
+  const orbitButtons = document.querySelectorAll('#categoryCircle .orbit-button');
+  const radius = 120;
+  orbitButtons.forEach((btn, i) => {
+    const angle = (i / orbitButtons.length) * 2 * Math.PI;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    btn.style.left = `${150 + x - 35}px`;
+    btn.style.top = `${150 + y - 35}px`;
+  });
+
+  // Fillimisht ngarko të dhënat
+  renderPoints(propertyData);
+</script>
 </body>
 </html>
