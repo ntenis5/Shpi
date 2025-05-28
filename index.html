@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Prona në Glob</title>
+  <title>Paneli i Prones</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #000;
+      background-color: black;
       color: white;
       overflow: hidden;
     }
@@ -16,33 +16,36 @@
     #globeViz {
       position: absolute;
       top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      width: 100vw;
+      height: 100vh;
       z-index: 0;
     }
 
-    button, input, select {
-      border-radius: 6px;
-      border: none;
-      padding: 6px;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-
-    /* Butoni Search në qendër sipër */
-    #searchToggle {
+    /* Butona lart */
+    .top-button {
       position: absolute;
       top: 10px;
+      background-color: white;
+      color: black;
+      border: none;
+      padding: 6px 12px;
+      font-weight: bold;
+      border-radius: 6px;
+      z-index: 5;
+      cursor: pointer;
+    }
+
+    #saleBtn {
+      left: 10px;
+    }
+
+    #searchToggle {
       left: 50%;
       transform: translateX(-50%);
-      z-index: 3;
-      background: white;
-      color: black;
-      padding: 4px 10px;
-      font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      width: auto;
-      font-weight: bold;
+    }
+
+    #rentBtn {
+      right: 10px;
     }
 
     /* Paneli i filtrave */
@@ -52,42 +55,29 @@
       top: 50px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      padding: 15px;
+      background-color: rgba(0,0,0,0.85);
       border: 1px solid white;
+      padding: 15px;
       border-radius: 10px;
       z-index: 4;
       width: 300px;
     }
 
-    /* Butonët Sale & Rent */
-    #saleBtn, #rentBtn {
-      position: absolute;
-      top: 10px;
-      background: white;
-      color: black;
-      padding: 4px 10px;
-      font-size: 14px;
+    #filterPanel input, #filterPanel select, #filterPanel button {
+      width: 100%;
+      margin: 6px 0;
+      padding: 6px;
       border-radius: 6px;
-      font-weight: bold;
-      z-index: 3;
+      border: none;
     }
 
-    #saleBtn {
-      left: 10px;
-    }
-
-    #rentBtn {
-      right: 10px;
-    }
-
-    /* Admin */
+    /* Admin poshtë */
     #adminToggle {
       position: absolute;
       bottom: 10px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 3;
+      z-index: 5;
       background: white;
       color: black;
       padding: 6px 12px;
@@ -99,7 +89,7 @@
     #adminPanel {
       display: none;
       position: absolute;
-      bottom: 50px;
+      bottom: 60px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.85);
@@ -109,38 +99,6 @@
       z-index: 4;
       width: 250px;
     }
-
-    #categoryCircle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 300px;
-      height: 300px;
-      margin: -150px 0 0 -150px;
-      border-radius: 50%;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .orbit-button {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid white;
-      border-radius: 50%;
-      width: 70px;
-      height: 70px;
-      pointer-events: auto;
-      text-align: center;
-      line-height: 1.2;
-      font-size: 13px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .orbit-button:hover {
-      background-color: rgba(255, 255, 255, 0.3);
-    }
   </style>
 </head>
 <body>
@@ -148,9 +106,9 @@
 <div id="globeViz"></div>
 
 <!-- Butonat sipër -->
-<button id="saleBtn">Sale</button>
-<button id="searchToggle">Search</button>
-<button id="rentBtn">Rent</button>
+<button id="saleBtn" class="top-button">Sale</button>
+<button id="searchToggle" class="top-button">Search</button>
+<button id="rentBtn" class="top-button">Rent</button>
 
 <!-- Paneli i filtrave -->
 <div id="filterPanel">
@@ -166,7 +124,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli admin -->
+<!-- Admin paneli -->
 <button id="adminToggle">Admin</button>
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
@@ -178,18 +136,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë -->
-<div id="categoryCircle">
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
-
-<!-- Scriptet -->
+<!-- GlobeJS -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
@@ -199,6 +146,17 @@
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
   const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
+
+  function renderPoints(data) {
+    globe.pointsData(data)
+      .pointLat(d => d.lat)
+      .pointLng(d => d.lng)
+      .pointAltitude(0.05)
+      .pointColor(() => 'orange')
+      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
+    
+    updateCategoryFilter(data);
+  }
 
   function addProperty() {
     const category = document.getElementById("new-category").value;
@@ -217,17 +175,6 @@
     localStorage.setItem("properties", JSON.stringify(propertyData));
     renderPoints(propertyData);
     alert("Prona u publikua!");
-  }
-
-  function renderPoints(data) {
-    globe.pointsData(data)
-      .pointLat(d => d.lat)
-      .pointLng(d => d.lng)
-      .pointAltitude(0.05)
-      .pointColor(() => 'orange')
-      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
-    
-    updateCategoryFilter(data);
   }
 
   function applyFilters() {
@@ -262,11 +209,7 @@
     });
   }
 
-  function filterByCategory(cat) {
-    document.getElementById("filter-category").value = cat;
-    applyFilters();
-  }
-
+  // Toggle Panels
   document.getElementById('adminToggle').onclick = () => {
     const panel = document.getElementById('adminPanel');
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
@@ -277,17 +220,8 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
-  const orbitButtons = document.querySelectorAll('#categoryCircle .orbit-button');
-  const radius = 120;
-  orbitButtons.forEach((btn, i) => {
-    const angle = (i / orbitButtons.length) * 2 * Math.PI;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    btn.style.left = `${150 + x - 35}px`;
-    btn.style.top = `${150 + y - 35}px`;
-  });
-
   renderPoints(propertyData);
 </script>
+
 </body>
 </html>
