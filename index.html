@@ -7,7 +7,7 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background-color: black;
       color: white;
       overflow: hidden;
@@ -21,16 +21,15 @@
       z-index: 0;
     }
 
-    /* Butonat kryesore lart */
     .top-button {
       position: absolute;
       top: 15px;
-      padding: 10px 20px;
+      padding: 14px 28px;
       background: white;
       color: black;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-size: 18px;
       font-weight: bold;
-      font-size: 16px;
       cursor: pointer;
       z-index: 5;
       border: none;
@@ -40,83 +39,80 @@
     #searchToggle { left: 50%; transform: translateX(-50%); }
     #rentBtn { right: 15px; }
 
-    /* Paneli i filtrave */
     #filterPanel {
       display: none;
       position: absolute;
-      top: 70px;
+      top: 80px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
-      padding: 15px;
+      background: rgba(0,0,0,0.9);
+      padding: 20px;
+      border: 1px solid white;
+      border-radius: 10px;
+      z-index: 4;
+      width: 320px;
+    }
+
+    #filterPanel input, #filterPanel select, #filterPanel button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    #adminToggle {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      background: white;
+      color: black;
+      padding: 14px 28px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #adminPanel {
+      display: none;
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      padding: 20px;
       border: 1px solid white;
       border-radius: 10px;
       z-index: 4;
       width: 300px;
     }
 
-    #filterPanel input, #filterPanel select, #filterPanel button {
-      width: 100%;
-      margin: 6px 0;
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-    }
-
-    /* Admin poshtë */
-    #adminToggle {
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      background: white;
-      color: black;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    #adminPanel {
-      display: none;
-      position: absolute;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
-      padding: 15px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 250px;
-    }
-
-    /* Rrethi i kategorive */
     #categoryCircle {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 400px;
-      height: 400px;
-      margin: -200px 0 0 -200px;
+      width: 500px;
+      height: 500px;
+      margin: -250px 0 0 -250px;
       z-index: 3;
       pointer-events: none;
     }
 
     .orbit-button {
       position: absolute;
-      width: 90px;
-      height: 90px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.2);
       color: white;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 15px;
       text-align: center;
       line-height: 1.2;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid white;
       cursor: pointer;
       pointer-events: auto;
@@ -124,7 +120,7 @@
     }
 
     .orbit-button:hover {
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.4);
     }
   </style>
 </head>
@@ -163,7 +159,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë rreth globit -->
+<!-- Kategoritë -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -264,13 +260,13 @@
 
   // Poziciono butonat në rreth
   const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 160;
+  const radius = 220;
   orbitButtons.forEach((btn, i) => {
     const angle = (i / orbitButtons.length) * 2 * Math.PI;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
-    btn.style.left = `${200 + x - 45}px`;
-    btn.style.top = `${200 + y - 45}px`;
+    btn.style.left = `${250 + x - 50}px`;
+    btn.style.top = `${250 + y - 50}px`;
   });
 
   renderPoints(propertyData);
