@@ -149,6 +149,26 @@
 
 <!-- Paneli admin -->
 <button id="adminToggle">Admin</button>
+  document.getElementById('adminToggle').onclick = () => {
+  const isLoggedIn = localStorage.getItem("adminLoggedIn");
+
+  if (!isLoggedIn) {
+    const username = prompt("Shkruaj përdoruesin:");
+    const password = prompt("Shkruaj fjalëkalimin:");
+
+    // Mund t'i ndryshosh këto sipas dëshirës
+    if (username === "nteniskotsiou@gmail.com" && password === "28Qershor1997") {
+      alert("U logove me sukses!");
+      localStorage.setItem("adminLoggedIn", "true");
+      document.getElementById("adminPanel").style.display = "block";
+    } else {
+      alert("Të dhënat nuk janë të sakta.");
+    }
+  } else {
+    const panel = document.getElementById("adminPanel");
+    panel.style.display = panel.style.display === "block" ? "none" : "block";
+  }
+};
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
