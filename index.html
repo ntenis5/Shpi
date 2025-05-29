@@ -128,12 +128,12 @@
 
 <div id="globeViz"></div>
 
-<!-- Butonat lart -->
+<!-- Butonat -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
 
-<!-- Paneli i filtrave -->
+<!-- Paneli i filtrit -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -147,28 +147,9 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli admin -->
+<!-- Paneli i adminit -->
 <button id="adminToggle">Admin</button>
-  document.getElementById('adminToggle').onclick = () => {
-  const isLoggedIn = localStorage.getItem("adminLoggedIn");
 
-  if (!isLoggedIn) {
-    const username = prompt("Shkruaj përdoruesin:");
-    const password = prompt("Shkruaj fjalëkalimin:");
-
-    // Mund t'i ndryshosh këto sipas dëshirës
-    if (username === "nteniskotsiou@gmail.com" && password === "28Qershor1997") {
-      alert("U logove me sukses!");
-      localStorage.setItem("adminLoggedIn", "true");
-      document.getElementById("adminPanel").style.display = "block";
-    } else {
-      alert("Të dhënat nuk janë të sakta.");
-    }
-  } else {
-    const panel = document.getElementById("adminPanel");
-    panel.style.display = panel.style.display === "block" ? "none" : "block";
-  }
-};
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -179,7 +160,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë -->
+<!-- Kategoritë në rreth -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -190,9 +171,11 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Scriptet -->
+<!-- Libraritë -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
+
+<!-- Logjika -->
 <script>
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
@@ -267,10 +250,36 @@
     applyFilters();
   }
 
-  // Shfaq ose fsheh panelet
+  // Admin Login
+  function checkAdmin() {
+    return localStorage.getItem("isAdmin") === "true";
+  }
+
+  function showAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'block';
+  }
+
+  function hideAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+
   document.getElementById('adminToggle').onclick = () => {
-    const panel = document.getElementById('adminPanel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    if (checkAdmin()) {
+      if (confirm("Dëshiron të çlogohesh?")) {
+        localStorage.removeItem("isAdmin");
+        hideAdminPanel();
+      }
+    } else {
+      const user = prompt("Përdoruesi:");
+      const pass = prompt("Fjalëkalimi:");
+      if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
+        alert("U logove me sukses si admin!");
+        localStorage.setItem("isAdmin", "true");
+        showAdminPanel();
+      } else {
+        alert("Kredencialet janë të gabuara.");
+      }
+    }
   };
 
   document.getElementById('searchToggle').onclick = () => {
@@ -278,7 +287,7 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Poziciono butonat në rreth
+  // Orbit buttons
   const orbitButtons = document.querySelectorAll('.orbit-button');
   const radius = 160;
   orbitButtons.forEach((btn, i) => {
@@ -289,7 +298,10 @@
     btn.style.top = `${250 + y - 50}px`;
   });
 
+  if (checkAdmin()) showAdminPanel();
+
   renderPoints(propertyData);
 </script>
+
 </body>
 </html>
