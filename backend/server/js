@@ -1,0 +1,16 @@
+// ======================== // FILE: backend/server.js // ========================
+
+const express = require('express'); const fs = require('fs'); const cors = require('cors'); const app = express(); const PORT = 3000; const dataPath = './backend/data/properties.json';
+
+app.use(cors()); app.use(express.json());
+
+// Load properties app.get('/properties', (req, res) => { if (!fs.existsSync(dataPath)) fs.writeFileSync(dataPath, '[]'); const data = JSON.parse(fs.readFileSync(dataPath)); res.json(data); });
+
+// Add property app.post('/properties', (req, res) => { const data = JSON.parse(fs.readFileSync(dataPath)); data.push(req.body); fs.writeFileSync(dataPath, JSON.stringify(data, null, 2)); res.status(201).json({ message: "Prona u shtua." }); });
+
+// Import app.post('/import', (req, res) => { fs.writeFileSync(dataPath, JSON.stringify(req.body, null, 2)); res.json({ message: "Importi u krye." }); });
+
+// Export app.get('/export', (req, res) => { const data = fs.readFileSync(dataPath); res.setHeader('Content-Disposition', 'attachment; filename=prona.json'); res.setHeader('Content-Type', 'application/json'); res.send(data); });
+
+app.listen(PORT, () => console.log(Serveri po punon: http://localhost:${PORT}));
+
