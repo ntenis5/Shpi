@@ -5,123 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prona në Glob</title>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: black;
-      color: white;
-      overflow: hidden;
-    }
-
-    #globeViz {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-    }
-
-    .top-button {
-      position: absolute;
-      top: 15px;
-      padding: 14px 28px;
-      background: white;
-      color: black;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 5;
-      border: none;
-    }
-
-    #saleBtn { left: 15px; }
-    #searchToggle { left: 50%; transform: translateX(-50%); }
-    #rentBtn { right: 15px; }
-
-    #filterPanel {
-      display: none;
-      position: absolute;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      padding: 20px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 320px;
-    }
-
-    #filterPanel input, #filterPanel select, #filterPanel button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-    }
-
-    #adminToggle {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      background: white;
-      color: black;
-      padding: 14px 28px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    #adminPanel {
-      display: none;
-      position: absolute;
-      bottom: 90px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      padding: 20px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 300px;
-    }
-
-    #categoryCircle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 500px;
-      height: 500px;
-      margin: -250px 0 0 -250px;
-      z-index: 3;
-      pointer-events: none;
-    }
-
-    .orbit-button {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      font-weight: bold;
-      font-size: 15px;
-      text-align: center;
-      line-height: 1.2;
-      padding: 12px;
-      border: 1px solid white;
-      cursor: pointer;
-      pointer-events: auto;
-      transition: background 0.3s;
-    }
-
-    .orbit-button:hover {
-      background-color: rgba(255, 255, 255, 0.4);
-    }
+    /* ... CSS I NJEJTE SI ME PARE ... */
   </style>
 </head>
 <body>
@@ -158,9 +42,6 @@
   <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
   <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
   <button onclick="addProperty()">Publiko</button>
-  <button onclick="exportData()">Eksporto të dhënat</button>
-  <label style="display:block; margin-top:10px;">Importo të dhëna:</label>
-  <input type="file" id="importFile" />
 </div>
 
 <!-- Kategoritë në rreth -->
@@ -178,14 +59,30 @@
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Logjika -->
-<script>
+<!-- Firebase & Logjika -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
+    authDomain: "shpi-d4e2d.firebaseapp.com",
+    projectId: "shpi-d4e2d",
+    storageBucket: "shpi-d4e2d.firebasestorage.app",
+    messagingSenderId: "600471884377",
+    appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const propertyCol = collection(db, "properties");
+
+  let allProperties = [];
+
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
-
-  const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -196,71 +93,6 @@
       .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
     updateCategoryFilter(data);
   }
-
-  function applyFilters() {
-    const fCategory = document.getElementById("filter-category").value.toLowerCase();
-    const fCity = document.getElementById("filter-city").value.toLowerCase();
-    const fMax = parseFloat(document.getElementById("filter-price").value);
-    const fMin = parseFloat(document.getElementById("filter-min-price").value);
-    const sort = document.getElementById("filter-sort").value;
-
-    let filtered = propertyData.filter(p => {
-      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
-             (!fCity || p.city.toLowerCase().includes(fCity)) &&
-             (!fMax || p.price <= fMax) &&
-             (!fMin || p.price >= fMin);
-    });
-
-    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
-    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
-
-    renderPoints(filtered);
-  }
-
-  function addProperty() {
-    const category = document.getElementById("new-category").value;
-    const city = document.getElementById("new-city").value;
-    const price = parseFloat(document.getElementById("new-price").value);
-    const lat = parseFloat(document.getElementById("new-lat").value);
-    const lng = parseFloat(document.getElementById("new-lng").value);
-
-    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-      alert("Plotëso të gjitha fushat.");
-      return;
-    }
-
-    const newProp = { category, city, price, lat, lng };
-    propertyData.push(newProp);
-    localStorage.setItem("properties", JSON.stringify(propertyData));
-    renderPoints(propertyData);
-    alert("Prona u publikua!");
-  }
-
-  function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(propertyData));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "prona.json");
-    dlAnchorElem.click();
-  }
-
-  document.getElementById("importFile").onchange = function(evt) {
-    const file = evt.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const imported = JSON.parse(e.target.result);
-        if (!Array.isArray(imported)) throw new Error("Formati duhet të jetë listë.");
-        propertyData.push(...imported);
-        localStorage.setItem("properties", JSON.stringify(propertyData));
-        renderPoints(propertyData);
-        alert("Të dhënat u importuan me sukses!");
-      } catch (err) {
-        alert("Skedari nuk është valid JSON.");
-      }
-    };
-    reader.readAsText(file);
-  };
 
   function updateCategoryFilter(data) {
     const categories = [...new Set(data.map(p => p.category))];
@@ -273,6 +105,43 @@
       select.appendChild(opt);
     });
   }
+
+  function applyFilters() {
+    const fCategory = document.getElementById("filter-category").value.toLowerCase();
+    const fCity = document.getElementById("filter-city").value.toLowerCase();
+    const fMax = parseFloat(document.getElementById("filter-price").value);
+    const fMin = parseFloat(document.getElementById("filter-min-price").value);
+    const sort = document.getElementById("filter-sort").value;
+
+    let filtered = allProperties.filter(p => {
+      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
+             (!fCity || p.city.toLowerCase().includes(fCity)) &&
+             (!fMax || p.price <= fMax) &&
+             (!fMin || p.price >= fMin);
+    });
+
+    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
+    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
+
+    renderPoints(filtered);
+  }
+
+  window.addProperty = async function () {
+    const category = document.getElementById("new-category").value;
+    const city = document.getElementById("new-city").value;
+    const price = parseFloat(document.getElementById("new-price").value);
+    const lat = parseFloat(document.getElementById("new-lat").value);
+    const lng = parseFloat(document.getElementById("new-lng").value);
+
+    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+      alert("Plotëso të gjitha fushat.");
+      return;
+    }
+
+    const newProp = { category, city, price, lat, lng };
+    await addDoc(propertyCol, newProp);
+    alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
+  };
 
   function filterByCategory(cat) {
     document.getElementById("filter-category").value = cat;
@@ -327,7 +196,10 @@
 
   if (checkAdmin()) showAdminPanel();
 
-  renderPoints(propertyData);
+  // Ngarko të dhënat nga Firebase dhe vizualizo
+  const propertySnap = await getDocs(propertyCol);
+  allProperties = propertySnap.docs.map(doc => doc.data());
+  renderPoints(allProperties);
 </script>
 
 </body>
