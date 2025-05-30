@@ -1,20 +1,31 @@
-<!-- index.html --><!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Globe Property Viewer</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="globeViz"></div>  <div id="adminPanel">
-    <h2>Shto Prone</h2>
-    <input type="text" id="title" placeholder="Titulli">
-    <input type="text" id="description" placeholder="Pershkrimi">
-    <input type="text" id="location" placeholder="Qyteti">
-    <input type="number" id="price" placeholder="Cmimi">
-    <input type="text" id="category" placeholder="Kategoria">
-    <input type="number" id="lat" placeholder="Gjeresia">
-    <input type="number" id="lng" placeholder="Gjatësia">
-    <button onclick="createProperty()">Shto</button>
-  </div>  <script type="module" src="/js/app.js"></script></body>
-</html>
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globe Property Viewer</title>
+    <link rel="stylesheet" href="style.css">
+</head><body>
+    <div class="container">
+        <h1>Globe Property Viewer</h1><div class="form-section">
+        <h2>Shto Pronë të Re</h2>
+        <form id="property-form">
+            <input type="text" id="title" placeholder="Titulli" required>
+            <textarea id="description" placeholder="Përshkrimi" required></textarea>
+            <input type="text" id="location" placeholder="Vendndodhja" required>
+            <input type="number" id="price" placeholder="Çmimi" required>
+            <select id="category">
+                <option value="Shitje">Shitje</option>
+                <option value="Qira">Qira</option>
+            </select>
+            <input type="number" id="latitude" placeholder="Gjerësia" step="any" required>
+            <input type="number" id="longitude" placeholder="Gjatësia" step="any" required>
+            <button type="submit">Shto Pronë</button>
+        </form>
+    </div>
+
+    <div id="map" style="height: 500px; margin-top: 20px;"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="app.js"></script>
+
+</body></html>
