@@ -1,23 +1,104 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prona në Glob</title>
   <style>
-    /* ... CSS I NJEJTE SI ME PARE ... */
+    body {
+      margin: 0;
+      background: #000;
+      font-family: sans-serif;
+      color: white;
+    }
+    #globeViz {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+    }
+    #filterPanel, #adminPanel {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      z-index: 10;
+    }
+    .top-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      margin-right: 10px;
+      padding: 8px 16px;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 10;
+    }
+    #searchToggle { left: 90px; }
+    #rentBtn { left: 190px; }
+    #adminToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: crimson;
+      color: white;
+      z-index: 10;
+    }
+    #categoryCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 500px;
+      height: 500px;
+      margin-left: -250px;
+      margin-top: -250px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .orbit-button {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    input, select {
+      display: block;
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
 <div id="globeViz"></div>
 
-<!-- Butonat -->
+<!-- Butonat kryesore -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
+<button id="adminToggle">Admin</button>
 
-<!-- Paneli i filtrit -->
+<!-- Paneli i filtrave -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -31,9 +112,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli i adminit -->
-<button id="adminToggle">Admin</button>
-
+<!-- Paneli për admin -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -44,7 +123,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë në rreth -->
+<!-- Kategoritë orbitale -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -59,7 +138,7 @@
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase & Logjika -->
+<!-- Firebase dhe JavaScript -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -196,7 +275,6 @@
 
   if (checkAdmin()) showAdminPanel();
 
-  // Ngarko të dhënat nga Firebase dhe vizualizo
   const propertySnap = await getDocs(propertyCol);
   allProperties = propertySnap.docs.map(doc => doc.data());
   renderPoints(allProperties);
