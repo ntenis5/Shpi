@@ -1,5 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
@@ -13,7 +13,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const propertyCol = collection(db, "properties");
-
 let allProperties = [];
 
 const globe = Globe()(document.getElementById('globeViz'))
@@ -43,7 +42,7 @@ function updateCategoryFilter(data) {
   });
 }
 
-function applyFilters() {
+window.applyFilters = function () {
   const fCategory = document.getElementById("filter-category").value.toLowerCase();
   const fCity = document.getElementById("filter-city").value.toLowerCase();
   const fMax = parseFloat(document.getElementById("filter-price").value);
@@ -61,29 +60,36 @@ function applyFilters() {
   if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
 
   renderPoints(filtered);
-}
+};
 
 window.addProperty = async function () {
-  const category = document.getElementById("new-category").value;
-  const city = document.getElementById("new-city").value;
+  const sanitize = (id) => document.getElementById(id).value.trim().replace(/[<>]/g, "");
+  const category = sanitize("new-category");
+  const city = sanitize("new-city");
   const price = parseFloat(document.getElementById("new-price").value);
   const lat = parseFloat(document.getElementById("new-lat").value);
   const lng = parseFloat(document.getElementById("new-lng").value);
 
   if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-    alert("Plotëso të gjitha fushat.");
+    alert("⚠️ Të gjitha fushat janë të detyrueshme dhe duhet të jenë të vlefshme.");
     return;
   }
 
-  const newProp = { category, city, price, lat, lng };
-  await addDoc(propertyCol, newProp);
-  alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
+  try {
+    const newProp = { category, city, price, lat, lng };
+    await addDoc(propertyCol, newProp);
+    alert("✅ Prona u shtua me sukses!");
+    location.reload();
+  } catch (err) {
+    console.error("Gabim në shtim prone:", err);
+    alert("❌ Shtimi i pronës dështoi.");
+  }
 };
 
-function filterByCategory(cat) {
+window.filterByCategory = function (cat) {
   document.getElementById("filter-category").value = cat;
   applyFilters();
-}
+};
 
 function checkAdmin() {
   return localStorage.getItem("isAdmin") === "true";
@@ -97,7 +103,6 @@ function hideAdminPanel() {
   document.getElementById('adminPanel').style.display = 'none';
 }
 
-// Eventet UI
 document.getElementById('adminToggle').onclick = () => {
   if (checkAdmin()) {
     if (confirm("Dëshiron të çlogohesh?")) {
@@ -105,15 +110,30 @@ document.getElementById('adminToggle').onclick = () => {
       hideAdminPanel();
     }
   } else {
-    const user = prompt("Përdoruesi:");
-    const pass = prompt("Fjalëkalimi:");
-    if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
-      alert("U logove me sukses si admin!");
-      localStorage.setItem("isAdmin", "true");
-      showAdminPanel();
-    } else {
-      alert("Kredencialet janë të gabuara.");
-    }
+    const loginBox = document.createElement('div');
+    loginBox.innerHTML = `
+      <div style="position:fixed;top:30%;left:35%;background:#222;padding:20px;border-radius:10px;z-index:9999;">
+        <h4>Admin Login</h4>
+        <input id="adminUser" placeholder="Email" style="margin-bottom:5px"><br>
+        <input id="adminPass" type="password" placeholder="Fjalëkalimi"><br><br>
+        <button onclick="submitAdminLogin()">Login</button>
+        <button onclick="this.parentElement.remove()">Anulo</button>
+      </div>
+    `;
+    document.body.appendChild(loginBox);
+  }
+};
+
+window.submitAdminLogin = () => {
+  const user = document.getElementById("adminUser").value.trim();
+  const pass = document.getElementById("adminPass").value.trim();
+  if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
+    alert("✔️ U logove me sukses si admin!");
+    localStorage.setItem("isAdmin", "true");
+    document.querySelector('[style*="Admin Login"]').remove();
+    showAdminPanel();
+  } else {
+    alert("❌ Kredencialet janë të gabuara.");
   }
 };
 
@@ -122,7 +142,6 @@ document.getElementById('searchToggle').onclick = () => {
   panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
 };
 
-// Vendos orbit buttons në rreth
 const orbitButtons = document.querySelectorAll('.orbit-button');
 const radius = 160;
 orbitButtons.forEach((btn, i) => {
