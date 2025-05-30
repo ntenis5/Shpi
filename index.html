@@ -4,67 +4,134 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prona në Glob</title>
-  <link rel="stylesheet" href="style.css" />
-<body>
-  <div id="globe-container"></div>
-
-  <script type="module">
-    import Globe from 'https://cdn.skypack.dev/globe.gl';
-
-    const globe = Globe()(document.getElementById('globe-container'))
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .backgroundColor('black');
-
-  </script>
-
   <style>
-    html, body {
+    body {
       margin: 0;
-      height: 100%;
+      font-family: sans-serif;
+      background-color: black;
+      color: white;
+      overflow: hidden;
     }
 
-    #globe-container {
-      width: 100%;
+    #globeViz {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      z-index: 0;
     }
 
-    canvas {
-      display: block;
+    .top-button {
+      position: absolute;
+      top: 15px;
+      padding: 14px 28px;
+      background: white;
+      color: black;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 5;
+      border: none;
+    }
+
+    #saleBtn { left: 15px; }
+    #searchToggle { left: 50%; transform: translateX(-50%); }
+    #rentBtn { right: 15px; }
+
+    #filterPanel {
+      display: none;
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      padding: 20px;
+      border: 1px solid white;
+      border-radius: 10px;
+      z-index: 4;
+      width: 320px;
+    }
+
+    #filterPanel input, #filterPanel select, #filterPanel button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    #adminToggle {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      background: white;
+      color: black;
+      padding: 14px 28px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #adminPanel {
+      display: none;
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      padding: 20px;
+      border: 1px solid white;
+      border-radius: 10px;
+      z-index: 4;
+      width: 300px;
+    }
+
+    #categoryCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 500px;
+      height: 500px;
+      margin: -250px 0 0 -250px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .orbit-button {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      text-align: center;
+      line-height: 1.2;
+      padding: 12px;
+      border: 1px solid white;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: background 0.3s;
+    }
+
+    .orbit-button:hover {
+      background-color: rgba(255, 255, 255, 0.4);
     }
   </style>
-</body>
-
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-    }
-
-    #globe-container {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    canvas {
-      display: block;
-    }
-  </style>
-  </body>
+</head>
 <body>
 
 <div id="globeViz"></div>
 
-<!-- Butonët -->
+<!-- Butonat lart -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button">Admin</button>
 
 <!-- Paneli i filtrave -->
 <div id="filterPanel">
@@ -80,8 +147,9 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli Admin -->
-<div id="adminPanel" style="display: none;">
+<!-- Paneli admin -->
+<button id="adminToggle">Admin</button>
+<div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
   <input type="text" id="new-city" placeholder="Qyteti/Shteti">
@@ -91,7 +159,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë orbitale -->
+<!-- Kategoritë -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -102,13 +170,106 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Libraritë -->
+<!-- Scriptet -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
+<script>
+  const globe = Globe()(document.getElementById('globeViz'))
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .backgroundColor('#000')
+    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
-<!-- Skriptet -->
-<script type="module" src="./app.js"></script>
-<script type="module" src="./admin.js"></script>
+  const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
 
+  function renderPoints(data) {
+    globe.pointsData(data)
+      .pointLat(d => d.lat)
+      .pointLng(d => d.lng)
+      .pointAltitude(0.05)
+      .pointColor(() => 'orange')
+      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
+    updateCategoryFilter(data);
+  }
+
+  function applyFilters() {
+    const fCategory = document.getElementById("filter-category").value.toLowerCase();
+    const fCity = document.getElementById("filter-city").value.toLowerCase();
+    const fMax = parseFloat(document.getElementById("filter-price").value);
+    const fMin = parseFloat(document.getElementById("filter-min-price").value);
+    const sort = document.getElementById("filter-sort").value;
+
+    let filtered = propertyData.filter(p => {
+      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
+             (!fCity || p.city.toLowerCase().includes(fCity)) &&
+             (!fMax || p.price <= fMax) &&
+             (!fMin || p.price >= fMin);
+    });
+
+    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
+    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
+
+    renderPoints(filtered);
+  }
+
+  function addProperty() {
+    const category = document.getElementById("new-category").value;
+    const city = document.getElementById("new-city").value;
+    const price = parseFloat(document.getElementById("new-price").value);
+    const lat = parseFloat(document.getElementById("new-lat").value);
+    const lng = parseFloat(document.getElementById("new-lng").value);
+
+    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+      alert("Plotëso të gjitha fushat.");
+      return;
+    }
+
+    const newProp = { category, city, price, lat, lng };
+    propertyData.push(newProp);
+    localStorage.setItem("properties", JSON.stringify(propertyData));
+    renderPoints(propertyData);
+    alert("Prona u publikua!");
+  }
+
+  function updateCategoryFilter(data) {
+    const categories = [...new Set(data.map(p => p.category))];
+    const select = document.getElementById("filter-category");
+    select.innerHTML = '<option value="">Të gjitha kategoritë</option>';
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      select.appendChild(opt);
+    });
+  }
+
+  function filterByCategory(cat) {
+    document.getElementById("filter-category").value = cat;
+    applyFilters();
+  }
+
+  // Shfaq ose fsheh panelet
+  document.getElementById('adminToggle').onclick = () => {
+    const panel = document.getElementById('adminPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  document.getElementById('searchToggle').onclick = () => {
+    const panel = document.getElementById('filterPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Poziciono butonat në rreth
+  const orbitButtons = document.querySelectorAll('.orbit-button');
+  const radius = 170;
+  orbitButtons.forEach((btn, i) => {
+    const angle = (i / orbitButtons.length) * 2 * Math.PI;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    btn.style.left = `${250 + x - 50}px`;
+    btn.style.top = `${250 + y - 50}px`;
+  });
+
+  renderPoints(propertyData);
+</script>
 </body>
 </html>
