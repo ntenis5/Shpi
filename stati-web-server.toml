@@ -7,11 +7,12 @@ log-level = "error"
 log-remote-address = false
 
 directory-listing = false
-cache-control-headers = false
+cache-control-headers = true
 
-cors-allow-origins = "*"
+# Lejo vetëm domainin tënd për CORS
+cors-allow-origins = "https://shpi.online"
+
 index-files = "index.html"
-
 ignore-hidden-files = true
 disable-symlinks = true
 
@@ -20,7 +21,6 @@ disable-symlinks = true
 [[advanced.headers]]
 source = "**"
 [advanced.headers.headers]
-Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
-Pragma = "no-cache"
-Expires = "0"
-Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+Cache-Control = "public, max-age=86400, immutable"
+Pragma = "public"
+Expires = "1d"
