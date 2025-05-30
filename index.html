@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prona në Glob</title>
   <style>
     body {
       margin: 0;
-      background: #000;
       font-family: sans-serif;
+      background: #000;
       color: white;
     }
     #globeViz {
@@ -29,8 +29,6 @@
     .top-button {
       position: absolute;
       top: 10px;
-      left: 10px;
-      margin-right: 10px;
       padding: 8px 16px;
       background: orange;
       color: black;
@@ -40,15 +38,13 @@
       cursor: pointer;
       z-index: 10;
     }
-    #searchToggle { left: 90px; }
-    #rentBtn { left: 190px; }
+    #saleBtn { left: 10px; }
+    #searchToggle { left: 100px; }
+    #rentBtn { left: 200px; }
     #adminToggle {
-      position: absolute;
-      top: 10px;
       right: 10px;
       background: crimson;
       color: white;
-      z-index: 10;
     }
     #categoryCircle {
       position: absolute;
@@ -74,10 +70,9 @@
       cursor: pointer;
     }
     input, select {
-      display: block;
       width: 100%;
       margin-bottom: 5px;
-      padding: 5px;
+      padding: 6px;
       border-radius: 5px;
       border: none;
     }
@@ -92,13 +87,13 @@
 
 <div id="globeViz"></div>
 
-<!-- Butonat kryesore -->
+<!-- Buttons -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle">Admin</button>
+<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
 
-<!-- Paneli i filtrave -->
+<!-- Filters -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -112,7 +107,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli për admin -->
+<!-- Admin Panel -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -123,7 +118,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë orbitale -->
+<!-- Orbit categories -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -134,11 +129,11 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Libraritë -->
+<!-- Libraries -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase dhe JavaScript -->
+<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -147,7 +142,7 @@
     apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
     authDomain: "shpi-d4e2d.firebaseapp.com",
     projectId: "shpi-d4e2d",
-    storageBucket: "shpi-d4e2d.firebasestorage.app",
+    storageBucket: "shpi-d4e2d.appspot.com",
     messagingSenderId: "600471884377",
     appId: "1:600471884377:web:5512544dc9dfb1fa009748"
   };
