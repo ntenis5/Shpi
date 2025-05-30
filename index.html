@@ -53,7 +53,12 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Libraritë e jashtme -->
+<!-- Butoni për ndalimin e rrotullimit -->
+<div id="rotationControls">
+  <button id="toggleRotation">⏸️ Ndalo Rrotullimin</button>
+</div>
+
+<!-- Libraritë -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
@@ -66,13 +71,13 @@
     const centerY = 250;
     let angleOffset = 0;
     let isRotating = true;
-    let speed = 0.01;
+    const speed = 0.01;
 
     const toggleBtn = document.getElementById('toggleRotation');
-    const speedRange = document.getElementById('speedRange');
 
-    speedRange.addEventListener('input', () => {
-      speed = parseFloat(speedRange.value);
+    toggleBtn.addEventListener('click', () => {
+      isRotating = !isRotating;
+      toggleBtn.textContent = isRotating ? "⏸️ Ndalo Rrotullimin" : "▶️ Fillo Rrotullimin";
     });
 
     function updatePositions() {
@@ -94,7 +99,7 @@
   });
 </script>
 
-<!-- Shtesat e tua me Firebase & Logjikë -->
+<!-- Firebase & funksionalitete tjera -->
 <script type="module" src="./app.js"></script>
 <script type="module" src="./admin.js"></script>
 
