@@ -8,16 +8,15 @@
 </head>
 <body>
 
-<!-- Glob Vizual -->
 <div id="globeViz"></div>
 
-<!-- Butonët Kryesorë -->
+<!-- Butonët -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
 <button id="adminToggle" class="top-button">Admin</button>
 
-<!-- Paneli i Filtrave -->
+<!-- Paneli i filtrave -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -31,8 +30,8 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli i Adminit -->
-<div id="adminPanel">
+<!-- Paneli Admin -->
+<div id="adminPanel" style="display: none;">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
   <input type="text" id="new-city" placeholder="Qyteti/Shteti">
@@ -42,7 +41,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë Orbitale -->
+<!-- Kategoritë orbitale -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -57,29 +56,7 @@
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Pozicionimi Responsive i Butonave -->
-<script>
-  function positionOrbitButtons() {
-    const buttons = document.querySelectorAll('.orbit-button');
-    const radius = Math.min(window.innerWidth, window.innerHeight) / 3;
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const angleStep = (2 * Math.PI) / buttons.length;
-
-    buttons.forEach((btn, i) => {
-      const angle = i * angleStep;
-      const x = centerX + radius * Math.cos(angle) - 50;
-      const y = centerY + radius * Math.sin(angle) - 50;
-      btn.style.left = `${x}px`;
-      btn.style.top = `${y}px`;
-    });
-  }
-
-  window.addEventListener("DOMContentLoaded", positionOrbitButtons);
-  window.addEventListener("resize", positionOrbitButtons);
-</script>
-
-<!-- Logjika e aplikacionit -->
+<!-- Skriptet -->
 <script type="module" src="./app.js"></script>
 <script type="module" src="./admin.js"></script>
 
