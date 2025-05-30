@@ -42,7 +42,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë orbitale -->
+<!-- Kategoritë Orbitale -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -57,14 +57,13 @@
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Pozicionimi statik në rreth -->
+<!-- Pozicionimi Responsive i Butonave -->
 <script>
-  window.addEventListener("DOMContentLoaded", () => {
+  function positionOrbitButtons() {
     const buttons = document.querySelectorAll('.orbit-button');
-    const radius = 200;
-    const centerX = 250;
-    const centerY = 250;
-
+    const radius = Math.min(window.innerWidth, window.innerHeight) / 3;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
     const angleStep = (2 * Math.PI) / buttons.length;
 
     buttons.forEach((btn, i) => {
@@ -74,10 +73,13 @@
       btn.style.left = `${x}px`;
       btn.style.top = `${y}px`;
     });
-  });
+  }
+
+  window.addEventListener("DOMContentLoaded", positionOrbitButtons);
+  window.addEventListener("resize", positionOrbitButtons);
 </script>
 
-<!-- Firebase & funksionalitetet tjera -->
+<!-- Logjika e aplikacionit -->
 <script type="module" src="./app.js"></script>
 <script type="module" src="./admin.js"></script>
 
