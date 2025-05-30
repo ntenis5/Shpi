@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
+// Firebase konfigurimi
 const firebaseConfig = {
   apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
   authDomain: "shpi-d4e2d.firebaseapp.com",
@@ -10,11 +11,13 @@ const firebaseConfig = {
   appId: "1:600471884377:web:5512544dc9dfb1fa009748"
 };
 
+// Inicimi i Firebase dhe Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const propertyCol = collection(db, "properties");
 let allProperties = [];
 
+// Inicializimi i globit
 const globe = Globe()(document.getElementById('globeViz'))
   .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
   .backgroundColor('#000')
@@ -91,55 +94,7 @@ window.filterByCategory = function (cat) {
   applyFilters();
 };
 
-function checkAdmin() {
-  return localStorage.getItem("isAdmin") === "true";
-}
-
-function showAdminPanel() {
-  document.getElementById('adminPanel').style.display = 'block';
-}
-
-function hideAdminPanel() {
-  document.getElementById('adminPanel').style.display = 'none';
-}
-
-document.getElementById('adminToggle').onclick = () => {
-  if (checkAdmin()) {
-    if (confirm("Dëshiron të çlogohesh?")) {
-      localStorage.removeItem("isAdmin");
-      hideAdminPanel();
-    }
-  } else {
-    const loginBox = document.createElement('div');
-    loginBox.innerHTML = `
-     bottom:5px"><br>
-        <input id="adminPass" type="password" placeholder="Fjalëkalimi"><br><br>
-        <button onclick="submitAdminLogin()">Login</button>
-        <button onclick="this.parentElement.remove()">Anulo</button>
-      </div>
-    `;
-    document.body.appendChild(loginBox);
-  }
-};
-
-window.submitAdminLogin = () => {
-  const user = document.getElementById("adminUser").value.trim();
-  const pass = document.getElementById("adminPass").value.trim();
-  if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
-    alert("✔️ U logove me sukses si admin!");
-    localStorage.setItem("isAdmin", "true");
-    document.querySelector('[style*="Admin Login"]').remove();
-    showAdminPanel();
-  } else {
-    alert("❌ Kredencialet janë të gabuara.");
-  }
-};
-
-document.getElementById('searchToggle').onclick = () => {
-  const panel = document.getElementById('filterPanel');
-  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-};
-
+// Rendisja orbitale e butonave të kategorive
 const orbitButtons = document.querySelectorAll('.orbit-button');
 const radius = 160;
 orbitButtons.forEach((btn, i) => {
@@ -150,10 +105,7 @@ orbitButtons.forEach((btn, i) => {
   btn.style.top = `${250 + y - 50}px`;
 });
 
-if (checkAdmin()) showAdminPanel();
-
+// Ngarko të gjitha pronat dhe shfaq në glob
 const propertySnap = await getDocs(propertyCol);
 allProperties = propertySnap.docs.map(doc => doc.data());
-renderPoints(allProperties); <div style="position:fixed;top:30%;left:35%;background:#222;padding:20px;border-radius:10px;z-index:9999;">
-        <h4>Admin Login</h4>
-        <input id="adminUser" placeholder="Email" style="margin-
+renderPoints(allProperties);
