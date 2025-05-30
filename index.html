@@ -8,15 +8,16 @@
 </head>
 <body>
 
+<!-- Glob Vizual -->
 <div id="globeViz"></div>
 
-<!-- Butonët -->
+<!-- Butonët Kryesorë -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
 <button id="adminToggle" class="top-button">Admin</button>
 
-<!-- Paneli i filtrave -->
+<!-- Paneli i Filtrave -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -30,8 +31,8 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli Admin -->
-<div id="adminPanel" style="display: none;">
+<!-- Paneli i Adminit -->
+<div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
   <input type="text" id="new-city" placeholder="Qyteti/Shteti">
@@ -52,11 +53,60 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Libraritë e nevojshme -->
+<!-- Kontrolli i Rrotullimit -->
+<div id="rotationControls">
+  <button id="toggleRotation">⏸️ Ndalo Rrotullimin</button>
+  <label for="speedRange">Shpejtësia:</label>
+  <input type="range" id="speedRange" min="0" max="0.1" step="0.001" value="0.01">
+</div>
+
+<!-- Libraritë e jashtme -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase & Logjika -->
+<!-- JavaScript për orbitën -->
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll('.orbit-button');
+    const radius = 200;
+    const centerX = 250;
+    const centerY = 250;
+    let angleOffset = 0;
+    let isRotating = true;
+    let speed = 0.01;
+
+    const toggleBtn = document.getElementById('toggleRotation');
+    const speedRange = document.getElementById('speedRange');
+
+    toggleBtn.addEventListener('click', () => {
+      isRotating = !isRotating;
+      toggleBtn.textContent = isRotating ? "⏸️ Ndalo Rrotullimin" : "▶️ Fillo Rrotullimin";
+    });
+
+    speedRange.addEventListener('input', () => {
+      speed = parseFloat(speedRange.value);
+    });
+
+    function updatePositions() {
+      const angleStep = (2 * Math.PI) / buttons.length;
+
+      buttons.forEach((btn, i) => {
+        const angle = i * angleStep + angleOffset;
+        const x = centerX + radius * Math.cos(angle) - 50;
+        const y = centerY + radius * Math.sin(angle) - 50;
+        btn.style.left = `${x}px`;
+        btn.style.top = `${y}px`;
+      });
+
+      if (isRotating) angleOffset += speed;
+      requestAnimationFrame(updatePositions);
+    }
+
+    updatePositions();
+  });
+</script>
+
+<!-- Shtesat e tua me Firebase & Logjikë -->
 <script type="module" src="./app.js"></script>
 <script type="module" src="./admin.js"></script>
 
