@@ -1,46 +1,24 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prona në Glob</title>
   <style>
     body {
       margin: 0;
+      font-family: sans-serif;
       background: #000;
       color: white;
-      font-family: sans-serif;
     }
     #globeViz {
+      position: absolute;
       width: 100vw;
       height: 100vh;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .top-button {
-      position: absolute;
-      top: 10px;
-      padding: 10px 15px;
-      margin-right: 10px;
-      background: orange;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 10;
-    }
-    #saleBtn { left: 10px; }
-    #searchToggle { left: 110px; }
-    #rentBtn { left: 220px; }
-    #adminToggle {
-      right: 10px;
-      background: crimson;
-      color: white;
     }
     #filterPanel, #adminPanel {
       position: absolute;
-      top: 60px;
+      top: 70px;
       left: 10px;
       background: rgba(0,0,0,0.7);
       padding: 10px;
@@ -48,12 +26,25 @@
       display: none;
       z-index: 10;
     }
-    input, select, button {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 8px;
-      border-radius: 5px;
+    .top-button {
+      position: absolute;
+      top: 10px;
+      padding: 8px 16px;
+      background: orange;
+      color: black;
+      font-weight: bold;
       border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 10;
+    }
+    #saleBtn { left: 10px; }
+    #searchToggle { left: 100px; }
+    #rentBtn { left: 200px; }
+    #adminToggle {
+      right: 10px;
+      background: crimson;
+      color: white;
     }
     #categoryCircle {
       position: absolute;
@@ -78,20 +69,31 @@
       pointer-events: auto;
       cursor: pointer;
     }
+    input, select {
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 6px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-<!-- Glob 3D -->
 <div id="globeViz"></div>
 
-<!-- Butonat Kryesore -->
-<button id="saleBtn" class="top-button">Shitje</button>
-<button id="searchToggle" class="top-button">Kërko</button>
-<button id="rentBtn" class="top-button">Qira</button>
-<button id="adminToggle" class="top-button">Admin</button>
+<!-- Buttons -->
+<button id="saleBtn" class="top-button">Sale</button>
+<button id="searchToggle" class="top-button">Search</button>
+<button id="rentBtn" class="top-button">Rent</button>
+<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
 
-<!-- Paneli i Filtrimit -->
+<!-- Filters -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -105,7 +107,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli i Adminit -->
+<!-- Admin Panel -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -116,7 +118,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Orbit Buttons -->
+<!-- Orbit categories -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -127,10 +129,11 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Scriptet e nevojshme -->
+<!-- Libraries -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
+<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
