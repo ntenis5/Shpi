@@ -1,4 +1,4 @@
-// Firebase configuration
+// Firebase konfigurimi
 const firebaseConfig = {
   apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
   authDomain: "shpi-df1ff.firebaseapp.com",
@@ -37,6 +37,7 @@ function loadProperties() {
         const data = doc.data();
         const div = document.createElement("div");
         div.innerHTML = `
+          <hr>
           <strong>${data.title}</strong> (${data.location})<br>
           <p>${data.description}</p>
           <button onclick="deleteProperty('${doc.id}')">Fshi</button>
@@ -49,6 +50,7 @@ function loadProperties() {
 
 document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
   e.preventDefault();
+
   const title = document.getElementById("title").value;
   const location = document.getElementById("location").value;
   const description = document.getElementById("description").value;
@@ -80,6 +82,7 @@ function editProperty(id, title, location, description) {
   const newTitle = prompt("Titulli i ri", title);
   const newLocation = prompt("Vendndodhja e re", location);
   const newDescription = prompt("Përshkrimi i ri", description);
+
   if (newTitle && newLocation && newDescription) {
     db.collection("prona").doc(id).update({
       title: newTitle,
