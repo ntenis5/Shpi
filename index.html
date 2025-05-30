@@ -10,12 +10,10 @@
 
   <script type="module">
     import Globe from 'https://cdn.skypack.dev/globe.gl';
-
-    const globe = Globe()(document.getElementById('globe-container'))
+  const globe = Globe()(document.getElementById('globe-container'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .backgroundColor('black');
-
-    globe.pointOfView({ lat: 0, lng: 0, altitude: 2 });
+   globe.pointOfView({ lat: 0, lng: 0, altitude: 2 });
   </script>
 
   <style>
