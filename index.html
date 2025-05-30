@@ -53,53 +53,31 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Butoni për ndalimin e rrotullimit -->
-<div id="rotationControls">
-  <button id="toggleRotation">⏸️ Ndalo Rrotullimin</button>
-</div>
-
 <!-- Libraritë -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- JavaScript për orbitën -->
+<!-- Pozicionimi statik në rreth -->
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const buttons = document.querySelectorAll('.orbit-button');
     const radius = 200;
     const centerX = 250;
     const centerY = 250;
-    let angleOffset = 0;
-    let isRotating = true;
-    const speed = 0.01;
 
-    const toggleBtn = document.getElementById('toggleRotation');
+    const angleStep = (2 * Math.PI) / buttons.length;
 
-    toggleBtn.addEventListener('click', () => {
-      isRotating = !isRotating;
-      toggleBtn.textContent = isRotating ? "⏸️ Ndalo Rrotullimin" : "▶️ Fillo Rrotullimin";
+    buttons.forEach((btn, i) => {
+      const angle = i * angleStep;
+      const x = centerX + radius * Math.cos(angle) - 50;
+      const y = centerY + radius * Math.sin(angle) - 50;
+      btn.style.left = `${x}px`;
+      btn.style.top = `${y}px`;
     });
-
-    function updatePositions() {
-      const angleStep = (2 * Math.PI) / buttons.length;
-
-      buttons.forEach((btn, i) => {
-        const angle = i * angleStep + angleOffset;
-        const x = centerX + radius * Math.cos(angle) - 50;
-        const y = centerY + radius * Math.sin(angle) - 50;
-        btn.style.left = `${x}px`;
-        btn.style.top = `${y}px`;
-      });
-
-      if (isRotating) angleOffset += speed;
-      requestAnimationFrame(updatePositions);
-    }
-
-    updatePositions();
   });
 </script>
 
-<!-- Firebase & funksionalitete tjera -->
+<!-- Firebase & funksionalitetet tjera -->
 <script type="module" src="./app.js"></script>
 <script type="module" src="./admin.js"></script>
 
