@@ -1,16 +1,62 @@
-// ======================== // FILE: backend/server.js // ========================
+// ========================
+// FILE: backend/server.js
+// ========================
 
-const express = require('express'); const fs = require('fs'); const cors = require('cors'); const app = express(); const PORT = 3000; const dataPath = './backend/data/properties.json';
+const express = require('express');
+const fs = require('fs');
+const cors = require('cors');
+const path = require('path');
 
-app.use(cors()); app.use(express.json());
+const app = express();
+const PORT = 3000;
 
-// Load properties app.get('/properties', (req, res) => { if (!fs.existsSync(dataPath)) fs.writeFileSync(dataPath, '[]'); const data = JSON.parse(fs.readFileSync(dataPath)); res.json(data); });
+const dataPath = path.join(__dirname, 'data', 'properties.json');
 
-// Add property app.post('/properties', (req, res) => { const data = JSON.parse(fs.readFileSync(dataPath)); data.push(req.body); fs.writeFileSync(dataPath, JSON.stringify(data, null, 2)); res.status(201).json({ message: "Prona u shtua." }); });
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Import app.post('/import', (req, res) => { fs.writeFileSync(dataPath, JSON.stringify(req.body, null, 2)); res.json({ message: "Importi u krye." }); });
+// Siguro që skedari ekziston
+function ensureDataFile() {
+  if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(path.dirname(dataPath), { recursive: true });
+    fs.writeFileSync(dataPath, '[]');
+  }
+}
 
-// Export app.get('/export', (req, res) => { const data = fs.readFileSync(dataPath); res.setHeader('Content-Disposition', 'attachment; filename=prona.json'); res.setHeader('Content-Type', 'application/json'); res.send(data); });
+// Load properties
+app.get('/properties', (req, res) => {
+  ensureDataFile();
+  const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+  res.json(data);
+});
 
-app.listen(PORT, () => console.log(Serveri po punon: http://localhost:${PORT}));
+// Add property
+app.post('/properties', (req, res) => {
+  ensureDataFile();
+  const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+  data.push(req.body);
+  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+  res.status(201).json({ message: "Prona u shtua." });
+});
 
+// Import properties
+app.post('/import', (req, res) => {
+  ensureDataFile();
+  fs.writeFileSync(dataPath, JSON.stringify(req.body, null, 2));
+  res.json({ message: "Importi u krye." });
+});
+
+// Export properties
+app.get('/export', (req, res) => {
+  ensureDataFile();
+  const data = fs.readFileSync(dataPath);
+  res.setHeader('Content-Disposition', 'attachment; filename=prona.json');
+  res.setHeader('Content-Type', 'application/json');
+  res.send(data);
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`✅ Serveri po punon: http://localhost:${PORT}`);
+});
