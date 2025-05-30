@@ -11,7 +11,6 @@ body {
   height: 100vh;
 }
 
-/* Panele */
 #filterPanel, #adminPanel {
   position: absolute;
   top: 70px;
@@ -23,7 +22,6 @@ body {
   z-index: 10;
 }
 
-/* Butonat kryesorë */
 .top-button {
   position: absolute;
   top: 10px;
@@ -36,6 +34,7 @@ body {
   cursor: pointer;
   z-index: 10;
 }
+
 #saleBtn { left: 10px; }
 #searchToggle { left: 100px; }
 #rentBtn { left: 200px; }
@@ -45,7 +44,6 @@ body {
   color: white;
 }
 
-/* Rrethi i kategorive */
 #categoryCircle {
   position: absolute;
   top: 50%;
@@ -58,7 +56,6 @@ body {
   z-index: 5;
 }
 
-/* Butonat orbitues të kategorive */
 .orbit-button {
   position: absolute;
   width: 100px;
@@ -72,20 +69,16 @@ body {
   cursor: pointer;
 }
 
-/* Inpute dhe selekto */
 input, select {
   width: 100%;
   margin-bottom: 5px;
   padding: 6px;
   border-radius: 5px;
   border: none;
-  box-sizing: border-box;
 }
 
-/* Butonat në panele */
 button {
   padding: 8px;
   border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
 }
