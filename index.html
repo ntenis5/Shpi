@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prona në Glob</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
+<div id="globeViz"></div>
+
+<!-- Butonët -->
+<button id="saleBtn" class="top-button">Sale</button>
+<button id="searchToggle" class="top-button">Search</button>
+<button id="rentBtn" class="top-button">Rent</button>
+<button id="adminToggle" class="top-button">Admin</button>
+
+<!-- Paneli i filtrave -->
+<div id="filterPanel">
+  <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
+  <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
+  <input type="number" id="filter-price" placeholder="Çmimi max">
+  <input type="number" id="filter-min-price" placeholder="Çmimi min">
+  <select id="filter-sort">
+    <option value="">Rendit sipas</option>
+    <option value="asc">Çmimi në rritje</option>
+    <option value="desc">Çmimi në zbritje</option>
+  </select>
+  <button onclick="applyFilters()">Filtro</button>
+</div>
+
+<!-- Paneli Admin -->
+<div id="adminPanel" style="display: none;">
+  <h4>Shto Pronë</h4>
+  <input type="text" id="new-category" placeholder="Kategoria">
+  <input type="text" id="new-city" placeholder="Qyteti/Shteti">
+  <input type="number" id="new-price" placeholder="Çmimi">
+  <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
+  <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
+  <button onclick="addProperty()">Publiko</button>
+</div>
+
+<!-- Kategoritë orbitale -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
+
+<!-- Libraritë e nevojshme -->
+<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/globe.gl"></script>
+
+<!-- Firebase & Logjika -->
+<script type="module" src="./app.js"></script>
+<script type="module" src="./admin.js"></script>
+
+</body>
+</html>
