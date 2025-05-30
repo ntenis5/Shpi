@@ -53,13 +53,6 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Kontrolli i Rrotullimit -->
-<div id="rotationControls">
-  <button id="toggleRotation">⏸️ Ndalo Rrotullimin</button>
-  <label for="speedRange">Shpejtësia:</label>
-  <input type="range" id="speedRange" min="0" max="0.1" step="0.001" value="0.01">
-</div>
-
 <!-- Libraritë e jashtme -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
@@ -77,11 +70,6 @@
 
     const toggleBtn = document.getElementById('toggleRotation');
     const speedRange = document.getElementById('speedRange');
-
-    toggleBtn.addEventListener('click', () => {
-      isRotating = !isRotating;
-      toggleBtn.textContent = isRotating ? "⏸️ Ndalo Rrotullimin" : "▶️ Fillo Rrotullimin";
-    });
 
     speedRange.addEventListener('input', () => {
       speed = parseFloat(speedRange.value);
