@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="sq">
+<!DOCTYPE html>
+<html lang="sq">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,25 +9,34 @@
   <h2>Hyr si Administrator</h2>
   <input type="email" id="email" placeholder="Email" />
   <input type="password" id="password" placeholder="Fjalëkalimi" />
-  <button onclick="login()">Hyr</button>  <div id="adminPanel" style="display:none">
+  <button onclick="login()">Hyr</button>
+
+  <div id="adminPanel" style="display:none">
     <h2>Shto / Menaxho Pronat</h2>
     <form id="addPropertyForm">
       <input type="text" id="title" placeholder="Titulli" required /><br />
       <input type="text" id="location" placeholder="Vendndodhja" required /><br />
       <textarea id="description" placeholder="Përshkrimi"></textarea><br />
       <button type="submit">Shto Pronë</button>
-    </form><h3>Lista e Pronave</h3>
-<div id="propertyList"></div>
+    </form>
 
-  </div>  <!-- Firebase SDK -->  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>  <script>
+    <h3>Lista e Pronave</h3>
+    <div id="propertyList"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
       authDomain: "shpi-df1ff.firebaseapp.com",
       projectId: "shpi-df1ff",
       storageBucket: "shpi-df1ff.appspot.com",
       messagingSenderId: "983229738097",
-      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0",
-      measurementId: "G-BQNNBXMEES"
+      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -85,7 +95,7 @@
               <strong>${data.title}</strong> (${data.location})<br>
               <small>${data.description}</small><br>
               <button onclick="deleteProperty('${doc.id}')">Fshi</button>
-              <button onclick="editProperty('${doc.id}', '${data.title}', '${data.location}', '${data.description}')">Edito</button>
+              <button onclick="editProperty('${doc.id}', \`${data.title}\`, \`${data.location}\`, \`${data.description}\`)">Edito</button>
             `;
             container.appendChild(div);
           });
@@ -116,4 +126,6 @@
         });
       }
     }
-  </
+  </script>
+</body>
+</html>
