@@ -1,14 +1,16 @@
 body {
+  background: #000;
+  color: white;
   margin: 0;
   font-family: sans-serif;
-background: #000;
-  color: white;
+  overflow: hidden;
 }
 
 #globeViz {
   position: absolute;
   width: 100vw;
   height: 100vh;
+  z-index: 0;
 }
 
 #filterPanel, #adminPanel {
@@ -38,8 +40,10 @@ background: #000;
 #saleBtn { left: 10px; }
 #searchToggle { left: 100px; }
 #rentBtn { left: 200px; }
+
 #adminToggle {
   right: 10px;
+  top: 10px;
   background: crimson;
   color: white;
 }
@@ -67,6 +71,12 @@ background: #000;
   border: none;
   pointer-events: auto;
   cursor: pointer;
+  box-shadow: 0 0 10px #ffa500;
+  transition: transform 0.3s;
+}
+
+.orbit-button:hover {
+  transform: scale(1.1);
 }
 
 input, select {
@@ -81,4 +91,28 @@ button {
   padding: 8px;
   border-radius: 5px;
   cursor: pointer;
+}
+
+/* Kontrolli i rrotullimit */
+#rotationControls {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#rotationControls label {
+  color: white;
+  font-size: 14px;
+}
+
+#rotationControls input[type="range"] {
+  width: 150px;
 }
