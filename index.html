@@ -76,7 +76,7 @@
       font-weight: bold;
     }
 
-    #loginPanel, #adminPanel {
+    #adminPanel, #loginPanel {
       display: none;
       position: absolute;
       bottom: 90px;
@@ -123,7 +123,11 @@
       background-color: rgba(255, 255, 255, 0.4);
     }
 
-    .hidden { display: none; }
+    #logoutBtn {
+      margin-top: 10px;
+      background-color: darkred;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -149,14 +153,16 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli login -->
+<!-- Paneli admin -->
+<button id="adminToggle">Admin</button>
+
 <div id="loginPanel">
-  <input type="text" id="admin-user" placeholder="Admin">
-  <input type="password" id="admin-pass" placeholder="Fjalëkalimi">
+  <h4>Kyçu si Admin</h4>
+  <input type="text" id="login-user" placeholder="Username">
+  <input type="password" id="login-pass" placeholder="Password">
   <button onclick="login()">Kyçu</button>
 </div>
 
-<!-- Paneli admin -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -165,7 +171,7 @@
   <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
   <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
   <button onclick="addProperty()">Publiko</button>
-  <button onclick="logout()">Dil</button>
+  <button id="logoutBtn" onclick="logout()">Dil</button>
 </div>
 
 <!-- Kategoritë -->
@@ -179,9 +185,6 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Butoni admin -->
-<button id="adminToggle">Admin</button>
-
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
@@ -191,6 +194,7 @@
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
   let propertyData = JSON.parse(localStorage.getItem('properties')) || [];
+  let isAdmin = false;
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -223,6 +227,8 @@
   }
 
   function addProperty() {
+    if (!isAdmin) return;
+
     const category = document.getElementById("new-category").value;
     const city = document.getElementById("new-city").value;
     const price = parseFloat(document.getElementById("new-price").value);
@@ -258,47 +264,52 @@
     applyFilters();
   }
 
-  // Sale dhe Rent
-  document.getElementById("saleBtn").onclick = () => {
-    renderPoints(propertyData.filter(p => p.category.toLowerCase().includes("shitje")));
+  // Login/logout
+  function login() {
+    const user = document.getElementById("login-user").value;
+    const pass = document.getElementById("login-pass").value;
+    if (user === "admin" && pass === "1234") {
+      isAdmin = true;
+      document.getElementById("loginPanel").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+    } else {
+      alert("Kredenciale të pasakta.");
+    }
+  }
+
+  function logout() {
+    isAdmin = false;
+    document.getElementById("adminPanel").style.display = "none";
+  }
+
+  document.getElementById('adminToggle').onclick = () => {
+    if (isAdmin) {
+      document.getElementById("adminPanel").style.display = 'block';
+    } else {
+      document.getElementById("loginPanel").style.display = 'block';
+    }
   };
 
-  document.getElementById("rentBtn").onclick = () => {
-    renderPoints(propertyData.filter(p => p.category.toLowerCase().includes("qira")));
-  };
-
-  // Search toggle
   document.getElementById('searchToggle').onclick = () => {
     const panel = document.getElementById('filterPanel');
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Admin login
-  document.getElementById('adminToggle').onclick = () => {
-    const isLogged = localStorage.getItem("adminLogged") === "true";
-    document.getElementById("adminPanel").style.display = isLogged ? 'block' : 'none';
-    document.getElementById("loginPanel").style.display = isLogged ? 'none' : 'block';
+  document.getElementById('saleBtn').onclick = () => {
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-city').value = '';
+    document.getElementById('filter-sort').value = 'asc';
+    applyFilters();
   };
 
-  function login() {
-    const user = document.getElementById("admin-user").value;
-    const pass = document.getElementById("admin-pass").value;
-    if (user === "admin" && pass === "1234") {
-      localStorage.setItem("adminLogged", "true");
-      document.getElementById("loginPanel").style.display = "none";
-      document.getElementById("adminPanel").style.display = "block";
-    } else {
-      alert("Kredencialet janë të pasakta.");
-    }
-  }
+  document.getElementById('rentBtn').onclick = () => {
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-city').value = '';
+    document.getElementById('filter-sort').value = 'desc';
+    applyFilters();
+  };
 
-  function logout() {
-    localStorage.removeItem("adminLogged");
-    document.getElementById("adminPanel").style.display = "none";
-    alert("U çkyçët.");
-  }
-
-  // Poziciono butonat në rreth
+  // Orbit buttons positioning
   const orbitButtons = document.querySelectorAll('.orbit-button');
   const radius = 170;
   orbitButtons.forEach((btn, i) => {
