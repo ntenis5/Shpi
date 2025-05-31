@@ -39,22 +39,26 @@
     #searchToggle { left: 50%; transform: translateX(-50%); }
     #rentBtn { right: 15px; }
 
-    #filterPanel, #adminPanel, #loginPanel {
+    #filterPanel {
       display: none;
       position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
       background: rgba(0,0,0,0.9);
       padding: 20px;
       border: 1px solid white;
       border-radius: 10px;
       z-index: 4;
-      width: 300px;
+      width: 320px;
     }
 
-    #filterPanel {
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 320px;
+    #filterPanel input, #filterPanel select, #filterPanel button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
     }
 
     #adminToggle {
@@ -72,18 +76,18 @@
       font-weight: bold;
     }
 
-    #adminPanel, #loginPanel {
+    #loginPanel, #adminPanel {
+      display: none;
+      position: absolute;
       bottom: 90px;
       left: 50%;
       transform: translateX(-50%);
-    }
-
-    input, select, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
+      background: rgba(0,0,0,0.9);
+      padding: 20px;
+      border: 1px solid white;
+      border-radius: 10px;
+      z-index: 4;
+      width: 300px;
     }
 
     #categoryCircle {
@@ -118,6 +122,8 @@
     .orbit-button:hover {
       background-color: rgba(255, 255, 255, 0.4);
     }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -143,18 +149,14 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Butoni admin -->
-<button id="adminToggle">Admin</button>
-
-<!-- Paneli i login -->
+<!-- Paneli login -->
 <div id="loginPanel">
-  <h4>Kyçu si Admin</h4>
-  <input type="text" id="admin-username" placeholder="Përdoruesi">
-  <input type="password" id="admin-password" placeholder="Fjalëkalimi">
-  <button onclick="loginAdmin()">Kyçu</button>
+  <input type="text" id="admin-user" placeholder="Admin">
+  <input type="password" id="admin-pass" placeholder="Fjalëkalimi">
+  <button onclick="login()">Kyçu</button>
 </div>
 
-<!-- Paneli për shtim prone -->
+<!-- Paneli admin -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -163,7 +165,7 @@
   <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
   <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
   <button onclick="addProperty()">Publiko</button>
-  <button onclick="logoutAdmin()">Dil</button>
+  <button onclick="logout()">Dil</button>
 </div>
 
 <!-- Kategoritë -->
@@ -177,7 +179,9 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Scriptet -->
+<!-- Butoni admin -->
+<button id="adminToggle">Admin</button>
+
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
@@ -186,10 +190,7 @@
     .backgroundColor('#000')
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
-  const ADMIN_USER = "admin";
-  const ADMIN_PASS = "1234";
-
-  const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
+  let propertyData = JSON.parse(localStorage.getItem('properties')) || [];
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -257,39 +258,47 @@
     applyFilters();
   }
 
-  function loginAdmin() {
-    const user = document.getElementById("admin-username").value;
-    const pass = document.getElementById("admin-password").value;
-
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      localStorage.setItem("isAdmin", "true");
-      document.getElementById("loginPanel").style.display = "none";
-      document.getElementById("adminPanel").style.display = "block";
-      alert("U kyçët me sukses!");
-    } else {
-      alert("Përdorues ose fjalëkalim i pasaktë.");
-    }
-  }
-
-  function logoutAdmin() {
-    localStorage.removeItem("isAdmin");
-    document.getElementById("adminPanel").style.display = "none";
-    document.getElementById("loginPanel").style.display = "none";
-    alert("U çkyçët!");
-  }
-
-  // Admin butoni - hap login ose panel
-  document.getElementById('adminToggle').onclick = () => {
-    if (localStorage.getItem("isAdmin") === "true") {
-      const panel = document.getElementById('adminPanel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    } else {
-      const login = document.getElementById('loginPanel');
-      login.style.display = login.style.display === 'block' ? 'none' : 'block';
-    }
+  // Sale dhe Rent
+  document.getElementById("saleBtn").onclick = () => {
+    renderPoints(propertyData.filter(p => p.category.toLowerCase().includes("shitje")));
   };
 
-  // Pozicionimi rrethor i kategorive
+  document.getElementById("rentBtn").onclick = () => {
+    renderPoints(propertyData.filter(p => p.category.toLowerCase().includes("qira")));
+  };
+
+  // Search toggle
+  document.getElementById('searchToggle').onclick = () => {
+    const panel = document.getElementById('filterPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Admin login
+  document.getElementById('adminToggle').onclick = () => {
+    const isLogged = localStorage.getItem("adminLogged") === "true";
+    document.getElementById("adminPanel").style.display = isLogged ? 'block' : 'none';
+    document.getElementById("loginPanel").style.display = isLogged ? 'none' : 'block';
+  };
+
+  function login() {
+    const user = document.getElementById("admin-user").value;
+    const pass = document.getElementById("admin-pass").value;
+    if (user === "admin" && pass === "1234") {
+      localStorage.setItem("adminLogged", "true");
+      document.getElementById("loginPanel").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+    } else {
+      alert("Kredencialet janë të pasakta.");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("adminLogged");
+    document.getElementById("adminPanel").style.display = "none";
+    alert("U çkyçët.");
+  }
+
+  // Poziciono butonat në rreth
   const orbitButtons = document.querySelectorAll('.orbit-button');
   const radius = 170;
   orbitButtons.forEach((btn, i) => {
@@ -299,11 +308,6 @@
     btn.style.left = `${250 + x - 50}px`;
     btn.style.top = `${250 + y - 50}px`;
   });
-
-  // Kontroll për admin të loguar
-  if (localStorage.getItem("isAdmin") === "true") {
-    document.getElementById("adminPanel").style.display = "block";
-  }
 
   renderPoints(propertyData);
 </script>
