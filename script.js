@@ -94,3 +94,22 @@ function editProperty(id, title, location, description) {
     });
   }
 }
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
+    authDomain: "shpi-d4e2d.firebaseapp.com",
+    projectId: "shpi-d4e2d",
+    storageBucket: "shpi-d4e2d.firebasestorage.app",
+    messagingSenderId: "600471884377",
+    appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
