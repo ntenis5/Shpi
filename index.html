@@ -39,26 +39,22 @@
     #searchToggle { left: 50%; transform: translateX(-50%); }
     #rentBtn { right: 15px; }
 
-    #filterPanel {
+    #filterPanel, #adminPanel, #loginPanel {
       display: none;
       position: absolute;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
       background: rgba(0,0,0,0.9);
       padding: 20px;
       border: 1px solid white;
       border-radius: 10px;
       z-index: 4;
-      width: 320px;
+      width: 300px;
     }
 
-    #filterPanel input, #filterPanel select, #filterPanel button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
+    #filterPanel {
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
     }
 
     #adminToggle {
@@ -76,18 +72,18 @@
       font-weight: bold;
     }
 
-    #adminPanel {
-      display: none;
-      position: absolute;
+    #adminPanel, #loginPanel {
       bottom: 90px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      padding: 20px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 300px;
+    }
+
+    input, select, button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
     }
 
     #categoryCircle {
@@ -147,8 +143,18 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli admin -->
+<!-- Butoni admin -->
 <button id="adminToggle">Admin</button>
+
+<!-- Paneli i login -->
+<div id="loginPanel">
+  <h4>Kyçu si Admin</h4>
+  <input type="text" id="admin-username" placeholder="Përdoruesi">
+  <input type="password" id="admin-password" placeholder="Fjalëkalimi">
+  <button onclick="loginAdmin()">Kyçu</button>
+</div>
+
+<!-- Paneli për shtim prone -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -157,6 +163,7 @@
   <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
   <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
   <button onclick="addProperty()">Publiko</button>
+  <button onclick="logoutAdmin()">Dil</button>
 </div>
 
 <!-- Kategoritë -->
@@ -178,6 +185,9 @@
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
+
+  const ADMIN_USER = "admin";
+  const ADMIN_PASS = "1234";
 
   const propertyData = JSON.parse(localStorage.getItem('properties')) || [];
 
@@ -247,18 +257,39 @@
     applyFilters();
   }
 
-  // Shfaq ose fsheh panelet
+  function loginAdmin() {
+    const user = document.getElementById("admin-username").value;
+    const pass = document.getElementById("admin-password").value;
+
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      localStorage.setItem("isAdmin", "true");
+      document.getElementById("loginPanel").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+      alert("U kyçët me sukses!");
+    } else {
+      alert("Përdorues ose fjalëkalim i pasaktë.");
+    }
+  }
+
+  function logoutAdmin() {
+    localStorage.removeItem("isAdmin");
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("loginPanel").style.display = "none";
+    alert("U çkyçët!");
+  }
+
+  // Admin butoni - hap login ose panel
   document.getElementById('adminToggle').onclick = () => {
-    const panel = document.getElementById('adminPanel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    if (localStorage.getItem("isAdmin") === "true") {
+      const panel = document.getElementById('adminPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    } else {
+      const login = document.getElementById('loginPanel');
+      login.style.display = login.style.display === 'block' ? 'none' : 'block';
+    }
   };
 
-  document.getElementById('searchToggle').onclick = () => {
-    const panel = document.getElementById('filterPanel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  };
-
-  // Poziciono butonat në rreth
+  // Pozicionimi rrethor i kategorive
   const orbitButtons = document.querySelectorAll('.orbit-button');
   const radius = 170;
   orbitButtons.forEach((btn, i) => {
@@ -268,6 +299,11 @@
     btn.style.left = `${250 + x - 50}px`;
     btn.style.top = `${250 + y - 50}px`;
   });
+
+  // Kontroll për admin të loguar
+  if (localStorage.getItem("isAdmin") === "true") {
+    document.getElementById("adminPanel").style.display = "block";
+  }
 
   renderPoints(propertyData);
 </script>
