@@ -1,3 +1,4 @@
+<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -8,114 +9,81 @@
     body {
       margin: 0;
       font-family: sans-serif;
-      background-color: black;
+      background: #000;
       color: white;
-      overflow: hidden;
     }
     #globeViz {
       position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    #filterPanel, #adminPanel {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      z-index: 10;
     }
     .top-button {
       position: absolute;
-      top: 15px;
-      padding: 14px 28px;
-      background: white;
+      top: 10px;
+      padding: 8px 16px;
+      background: orange;
       color: black;
-      border-radius: 10px;
-      font-size: 18px;
       font-weight: bold;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      z-index: 5;
-      border: none;
+      z-index: 10;
     }
-    #saleBtn { left: 15px; }
-    #searchToggle { left: 50%; transform: translateX(-50%); }
-    #rentBtn { right: 15px; }
-
-    #filterPanel {
-      display: none;
-      position: absolute;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      padding: 20px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 320px;
-    }
-
-    #filterPanel input, #filterPanel select, #filterPanel button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-    }
-
+    #saleBtn { left: 10px; }
+    #searchToggle { left: 100px; }
+    #rentBtn { left: 200px; }
     #adminToggle {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      background: white;
-      color: black;
-      padding: 14px 28px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: bold;
+      right: 10px;
+      background: crimson;
+      color: white;
     }
-
-    #loginPanel, #adminPanel {
-      display: none;
-      position: absolute;
-      bottom: 90px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      padding: 20px;
-      border: 1px solid white;
-      border-radius: 10px;
-      z-index: 4;
-      width: 300px;
-    }
-
     #categoryCircle {
       position: absolute;
       top: 50%;
       left: 50%;
       width: 500px;
       height: 500px;
-      margin: -250px 0 0 -250px;
-      z-index: 3;
+      margin-left: -250px;
+      margin-top: -250px;
       pointer-events: none;
+      z-index: 5;
     }
-
     .orbit-button {
       position: absolute;
       width: 100px;
       height: 100px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
+      background: orange;
+      color: black;
       font-weight: bold;
-      font-size: 15px;
-      text-align: center;
-      line-height: 1.2;
-      padding: 12px;
-      border: 1px solid white;
-      cursor: pointer;
+      border: none;
       pointer-events: auto;
-      transition: background 0.3s;
+      cursor: pointer;
     }
     .orbit-button:hover {
-      background-color: rgba(255, 255, 255, 0.4);
+      background: darkorange;
+    }
+    input, select {
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 6px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -123,12 +91,13 @@
 
 <div id="globeViz"></div>
 
-<!-- Butonat lart -->
+<!-- Buttons -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
+<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
 
-<!-- Paneli i filtrave -->
+<!-- Filters -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -142,15 +111,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Paneli për login -->
-<div id="loginPanel">
-  <input type="email" id="login-email" placeholder="Email">
-  <input type="password" id="login-password" placeholder="Fjalëkalimi">
-  <button onclick="login()">Hyr</button>
-</div>
-
-<!-- Paneli admin -->
-<button id="adminToggle">Admin</button>
+<!-- Admin Panel -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -161,7 +122,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Kategoritë -->
+<!-- Orbit categories -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -172,32 +133,34 @@
   <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
 </div>
 
-<!-- Scriptet -->
+<!-- Libraries -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-  const supabase = supabase.createClient(
-    'https://crdwgevvwuwpmhyyqust.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyZHdnZXZ2d3V3cG1oeXlxdXN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDkxMDEsImV4cCI6MjA2NDIyNTEwMX0.GOUevDqJfPkdtyaDajJ2LwOqEBBzDeHbbvot7TB3GpM'
-  );
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
+    authDomain: "shpi-d4e2d.firebaseapp.com",
+    projectId: "shpi-d4e2d",
+    storageBucket: "shpi-d4e2d.appspot.com",
+    messagingSenderId: "600471884377",
+    appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const propertyCol = collection(db, "properties");
+
+  let allProperties = [];
 
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
-
-  let propertyData = [];
-
-  async function fetchProperties() {
-    const { data, error } = await supabase.from('properties').select('*');
-    if (!error) {
-      propertyData = data;
-      renderPoints(data);
-    } else {
-      alert("Gabim në ngarkimin e pronave!");
-    }
-  }
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -205,61 +168,8 @@
       .pointLng(d => d.lng)
       .pointAltitude(0.05)
       .pointColor(() => 'orange')
-      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
+      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price.toLocaleString('sq-AL')}`);
     updateCategoryFilter(data);
-  }
-
-  function applyFilters() {
-    const fCategory = document.getElementById("filter-category").value.toLowerCase();
-    const fCity = document.getElementById("filter-city").value.toLowerCase();
-    const fMax = parseFloat(document.getElementById("filter-price").value);
-    const fMin = parseFloat(document.getElementById("filter-min-price").value);
-    const sort = document.getElementById("filter-sort").value;
-
-    let filtered = propertyData.filter(p => {
-      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
-             (!fCity || p.city.toLowerCase().includes(fCity)) &&
-             (!fMax || p.price <= fMax) &&
-             (!fMin || p.price >= fMin);
-    });
-
-    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
-    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
-
-    renderPoints(filtered);
-  }
-
-  async function addProperty() {
-    const category = document.getElementById("new-category").value;
-    const city = document.getElementById("new-city").value;
-    const price = parseFloat(document.getElementById("new-price").value);
-    const lat = parseFloat(document.getElementById("new-lat").value);
-    const lng = parseFloat(document.getElementById("new-lng").value);
-
-    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-      alert("Plotëso të gjitha fushat.");
-      return;
-    }
-
-    const { error } = await supabase.from('properties').insert([{ category, city, price, lat, lng }]);
-    if (!error) {
-      alert("Prona u publikua!");
-      fetchProperties();
-    } else {
-      alert("Gabim në publikim!");
-    }
-  }
-
-  async function login() {
-    const email = document.getElementById("login-email").value;
-    const password = document.getElementById("login-password").value;
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert("Login i pasaktë");
-    } else {
-      document.getElementById("loginPanel").style.display = "none";
-      document.getElementById("adminPanel").style.display = "block";
-    }
   }
 
   function updateCategoryFilter(data) {
@@ -274,20 +184,84 @@
     });
   }
 
+  function applyFilters() {
+    const fCategory = document.getElementById("filter-category").value.toLowerCase();
+    const fCity = document.getElementById("filter-city").value.toLowerCase();
+    const fMax = parseFloat(document.getElementById("filter-price").value);
+    const fMin = parseFloat(document.getElementById("filter-min-price").value);
+    const sort = document.getElementById("filter-sort").value;
+
+    let filtered = allProperties.filter(p => {
+      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
+             (!fCity || p.city.toLowerCase().includes(fCity)) &&
+             (!fMax || p.price <= fMax) &&
+             (!fMin || p.price >= fMin);
+    });
+
+    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
+    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
+
+    renderPoints(filtered);
+  }
+
+  window.addProperty = async function () {
+    try {
+      const category = document.getElementById("new-category").value;
+      const city = document.getElementById("new-city").value;
+      const price = parseFloat(document.getElementById("new-price").value);
+      const lat = parseFloat(document.getElementById("new-lat").value);
+      const lng = parseFloat(document.getElementById("new-lng").value);
+
+      if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+        alert("Plotëso të gjitha fushat.");
+        return;
+      }
+
+      const newProp = { category, city, price, lat, lng };
+      await addDoc(propertyCol, newProp);
+      alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
+      allProperties.push(newProp);
+      renderPoints(allProperties);
+    } catch (err) {
+      console.error(err);
+      alert("Gabim gjatë shtimit.");
+    }
+  };
+
   function filterByCategory(cat) {
     document.getElementById("filter-category").value = cat;
     applyFilters();
   }
 
-  // Shfaq ose fsheh panelet
+  function checkAdmin() {
+    return localStorage.getItem("isAdmin") === "true";
+  }
+
+  function showAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'block';
+  }
+
+  function hideAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+
   document.getElementById('adminToggle').onclick = () => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        document.getElementById("adminPanel").style.display = "block";
-      } else {
-        document.getElementById("loginPanel").style.display = "block";
+    if (checkAdmin()) {
+      if (confirm("Dëshiron të çlogohesh?")) {
+        localStorage.removeItem("isAdmin");
+        hideAdminPanel();
       }
-    });
+    } else {
+      const user = prompt("Përdoruesi:");
+      const pass = prompt("Fjalëkalimi:");
+      if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
+        alert("U logove me sukses si admin!");
+        localStorage.setItem("isAdmin", "true");
+        showAdminPanel();
+      } else {
+        alert("Kredencialet janë të gabuara.");
+      }
+    }
   };
 
   document.getElementById('searchToggle').onclick = () => {
@@ -295,9 +269,8 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Rreth për kategori
   const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 170;
+  const radius = 160;
   orbitButtons.forEach((btn, i) => {
     const angle = (i / orbitButtons.length) * 2 * Math.PI;
     const x = Math.cos(angle) * radius;
@@ -306,7 +279,13 @@
     btn.style.top = `${250 + y - 50}px`;
   });
 
-  fetchProperties();
+  if (checkAdmin()) showAdminPanel();
+
+  const propertySnap = await getDocs(propertyCol);
+  allProperties = propertySnap.docs.map(doc => doc.data());
+  renderPoints(allProperties);
 </script>
+
 </body>
 </html>
+<!-- mbaron index.html -->
