@@ -1,4 +1,3 @@
-<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -95,7 +94,7 @@
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
+<button id="adminToggle" class="top-button">Admin</button>
 
 <!-- Filters -->
 <div id="filterPanel">
@@ -119,6 +118,12 @@
   <input type="number" id="new-price" placeholder="Çmimi">
   <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
   <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
+  <label>Tipi i pronës:
+    <select id="new-type">
+      <option value="sale">Në shitje</option>
+      <option value="rent">Me qira</option>
+    </select>
+  </label>
   <button onclick="addProperty()">Publiko</button>
 </div>
 
@@ -211,13 +216,14 @@
       const price = parseFloat(document.getElementById("new-price").value);
       const lat = parseFloat(document.getElementById("new-lat").value);
       const lng = parseFloat(document.getElementById("new-lng").value);
+      const type = document.getElementById("new-type").value;
 
       if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
         alert("Plotëso të gjitha fushat.");
         return;
       }
 
-      const newProp = { category, city, price, lat, lng };
+      const newProp = { category, city, price, lat, lng, type };
       await addDoc(propertyCol, newProp);
       alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
       allProperties.push(newProp);
@@ -269,6 +275,16 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
+  document.getElementById('saleBtn').onclick = () => {
+    const filtered = allProperties.filter(p => p.type === 'sale');
+    renderPoints(filtered);
+  };
+
+  document.getElementById('rentBtn').onclick = () => {
+    const filtered = allProperties.filter(p => p.type === 'rent');
+    renderPoints(filtered);
+  };
+
   const orbitButtons = document.querySelectorAll('.orbit-button');
   const radius = 160;
   orbitButtons.forEach((btn, i) => {
@@ -285,70 +301,6 @@
   allProperties = propertySnap.docs.map(doc => doc.data());
   renderPoints(allProperties);
 </script>
-
-</body>
-</html>
-<!-- mbaron index.html -->
-<!DOCTYPE html>
-<html lang="sq">
-<head>
-  <meta charset="UTF-8">
-  <title>Globi si Buton</title>
-  <style>
-    body {
-      margin: 0;
-      height: 95vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #000;
-    }
-    #globeButton {
-      width: 100px;
-      height: 100px;
-      background-color: orange;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      position: relative;
-    }
-    #globeButton::after {
-      content: "🌍";
-      position: absolute;
-      top: 25%;
-      left: 25%;
-      font-size: 50px;
-    }
-    #searchPanel {
-      display: none;
-      position: absolute;
-      top: 120px;
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 10px;
-      color: #000;
-    }
-  </style>
-
-  <button id="globeButton"></button>
-  <div id="searchPanel">
-    <input type="text" placeholder="Qyteti">
-    <input type="text" placeholder="Shteti">
-    <button>Kërko</button>
-  </div>
-
-  <script>
-    const globeButton = document.getElementById('globeButton');
-    const searchPanel = document.getElementById('searchPanel');
-
-    globeButton.addEventListener('click', () => {
-      if (searchPanel.style.display === 'none') {
-        searchPanel.style.display = 'block';
-      } else {
-        searchPanel.style.display = 'none';
-      }
-    });
-  </script>
 
 </body>
 </html>
