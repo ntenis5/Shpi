@@ -1,4 +1,4 @@
-<!-- fillon index.html -->
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -95,7 +95,7 @@
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
+<button id="adminToggle" class="top-button">Admin</button>
 
 <!-- Filters -->
 <div id="filterPanel">
@@ -137,7 +137,7 @@
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase -->
+<!-- Firebase + Logic -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -285,70 +285,6 @@
   allProperties = propertySnap.docs.map(doc => doc.data());
   renderPoints(allProperties);
 </script>
-
-</body>
-</html>
-<!-- mbaron index.html -->
-<!DOCTYPE html>
-<html lang="sq">
-<head>
-  <meta charset="UTF-8">
-  <title>Globi si Buton</title>
-  <style>
-    body {
-      margin: 0;
-      height: 95vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #000;
-    }
-    #globeButton {
-      width: 100px;
-      height: 100px;
-      background-color: orange;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      position: relative;
-    }
-    #globeButton::after {
-      content: "🌍";
-      position: absolute;
-      top: 25%;
-      left: 25%;
-      font-size: 50px;
-    }
-    #searchPanel {
-      display: none;
-      position: absolute;
-      top: 120px;
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 10px;
-      color: #000;
-    }
-  </style>
-
-  <button id="globeButton"></button>
-  <div id="searchPanel">
-    <input type="text" placeholder="Qyteti">
-    <input type="text" placeholder="Shteti">
-    <button>Kërko</button>
-  </div>
-
-  <script>
-    const globeButton = document.getElementById('globeButton');
-    const searchPanel = document.getElementById('searchPanel');
-
-    globeButton.addEventListener('click', () => {
-      if (searchPanel.style.display === 'none') {
-        searchPanel.style.display = 'block';
-      } else {
-        searchPanel.style.display = 'none';
-      }
-    });
-  </script>
 
 </body>
 </html>
