@@ -1,3 +1,4 @@
+<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -10,13 +11,11 @@
       font-family: sans-serif;
       background: #000;
       color: white;
-      overflow: hidden;
     }
     #globeViz {
       position: absolute;
       width: 100vw;
       height: 100vh;
-      z-index: 1;
     }
     #filterPanel, #adminPanel {
       position: absolute;
@@ -27,7 +26,6 @@
       border-radius: 8px;
       display: none;
       z-index: 10;
-      max-width: 320px;
     }
     .top-button {
       position: absolute;
@@ -57,7 +55,7 @@
       height: 500px;
       margin-left: -250px;
       margin-top: -250px;
-      pointer-events: none; /* Për të mos ndërhyrë me globin */
+      pointer-events: none;
       z-index: 5;
     }
     .orbit-button {
@@ -69,21 +67,15 @@
       color: black;
       font-weight: bold;
       border: none;
-      pointer-events: auto; /* Aktivon klikimin */
+      pointer-events: auto;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      user-select: none;
-      transition: background 0.3s;
     }
     .orbit-button:hover {
       background: darkorange;
     }
     input, select {
       width: 100%;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       padding: 6px;
       border-radius: 5px;
       border: none;
@@ -99,13 +91,13 @@
 
 <div id="globeViz"></div>
 
-<!-- Buttons Top -->
+<!-- Buttons -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button">Admin</button>
+<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
 
-<!-- Filter Panel -->
+<!-- Filters -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -130,7 +122,7 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Orbit Categories Circle -->
+<!-- Orbit categories -->
 <div id="categoryCircle">
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
@@ -145,7 +137,7 @@
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase and Script -->
+<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -165,13 +157,11 @@
 
   let allProperties = [];
 
-  // Initialize globe
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
-  // Load and render points on globe
   function renderPoints(data) {
     globe.pointsData(data)
       .pointLat(d => d.lat)
@@ -182,7 +172,6 @@
     updateCategoryFilter(data);
   }
 
-  // Fill category filter dropdown, no duplicates
   function updateCategoryFilter(data) {
     const categories = [...new Set(data.map(p => p.category))];
     const select = document.getElementById("filter-category");
@@ -195,7 +184,6 @@
     });
   }
 
-  // Apply filters and sort
   function applyFilters() {
     const fCategory = document.getElementById("filter-category").value.toLowerCase();
     const fCity = document.getElementById("filter-city").value.toLowerCase();
@@ -216,29 +204,88 @@
     renderPoints(filtered);
   }
 
-  // Add new property to Firestore
   window.addProperty = async function () {
     try {
-      const category = document.getElementById("new-category").value.trim();
-      const city = document.getElementById("new-city").value.trim();
+      const category = document.getElementById("new-category").value;
+      const city = document.getElementById("new-city").value;
       const price = parseFloat(document.getElementById("new-price").value);
       const lat = parseFloat(document.getElementById("new-lat").value);
       const lng = parseFloat(document.getElementById("new-lng").value);
 
       if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-        alert("Plotëso të gjitha fushat me të dhëna valide.");
+        alert("Plotëso të gjitha fushat.");
         return;
       }
 
       const newProp = { category, city, price, lat, lng };
       await addDoc(propertyCol, newProp);
-
-      // Shto lokalisht edhe në array për rifreskim
+      alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
       allProperties.push(newProp);
       renderPoints(allProperties);
+    } catch (err) {
+      console.error(err);
+      alert("Gabim gjatë shtimit.");
+    }
+  };
 
-      alert("Prona u shtua me sukses!");
-      // Pastroni fushat
-      document.getElementById("new-category").value = '';
-      document.getElementById("new-city").value = '';
-      document.getElementById("new-price").value
+  function filterByCategory(cat) {
+    document.getElementById("filter-category").value = cat;
+    applyFilters();
+  }
+
+  function checkAdmin() {
+    return localStorage.getItem("isAdmin") === "true";
+  }
+
+  function showAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'block';
+  }
+
+  function hideAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+
+  document.getElementById('adminToggle').onclick = () => {
+    if (checkAdmin()) {
+      if (confirm("Dëshiron të çlogohesh?")) {
+        localStorage.removeItem("isAdmin");
+        hideAdminPanel();
+      }
+    } else {
+      const user = prompt("Përdoruesi:");
+      const pass = prompt("Fjalëkalimi:");
+      if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
+        alert("U logove me sukses si admin!");
+        localStorage.setItem("isAdmin", "true");
+        showAdminPanel();
+      } else {
+        alert("Kredencialet janë të gabuara.");
+      }
+    }
+  };
+
+  document.getElementById('searchToggle').onclick = () => {
+    const panel = document.getElementById('filterPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  const orbitButtons = document.querySelectorAll('.orbit-button');
+  const radius = 160;
+  orbitButtons.forEach((btn, i) => {
+    const angle = (i / orbitButtons.length) * 2 * Math.PI;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    btn.style.left = `${250 + x - 50}px`;
+    btn.style.top = `${250 + y - 50}px`;
+  });
+
+  if (checkAdmin()) showAdminPanel();
+
+  const propertySnap = await getDocs(propertyCol);
+  allProperties = propertySnap.docs.map(doc => doc.data());
+  renderPoints(allProperties);
+</script>
+
+</body>
+</html>
+<!-- mbaron index.html -->
