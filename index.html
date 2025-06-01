@@ -1,4 +1,3 @@
-<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -6,17 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prona në Glob</title>
   <style>
-    body {
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: sans-serif;
       background: #000;
       color: white;
+      overflow: hidden;
     }
-    #globeViz {
+
+    #globeContainer {
       position: absolute;
-      width: 100vw;
-      height: 100vh;
+      top: 50%;
+      left: 50%;
+      width: 200px;
+      height: 200px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 3;
+      cursor: pointer;
     }
+
+    #globeViz {
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* nuk lejon ndërveprim me miun */
+    }
+
+    #categoryCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 400px;
+      height: 400px;
+      margin-left: -200px;
+      margin-top: -200px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .orbit-button {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .orbit-button:hover {
+      background: darkorange;
+    }
+
     #filterPanel, #adminPanel {
       position: absolute;
       top: 70px;
@@ -27,6 +75,7 @@
       display: none;
       z-index: 10;
     }
+
     .top-button {
       position: absolute;
       top: 10px;
@@ -39,6 +88,7 @@
       cursor: pointer;
       z-index: 10;
     }
+
     #saleBtn { left: 10px; }
     #searchToggle { left: 100px; }
     #rentBtn { left: 200px; }
@@ -47,32 +97,7 @@
       background: crimson;
       color: white;
     }
-    #categoryCircle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 500px;
-      height: 500px;
-      margin-left: -250px;
-      margin-top: -250px;
-      pointer-events: none;
-      z-index: 5;
-    }
-    .orbit-button {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: orange;
-      color: black;
-      font-weight: bold;
-      border: none;
-      pointer-events: auto;
-      cursor: pointer;
-    }
-    .orbit-button:hover {
-      background: darkorange;
-    }
+
     input, select {
       width: 100%;
       margin-bottom: 5px;
@@ -80,6 +105,7 @@
       border-radius: 5px;
       border: none;
     }
+
     button {
       padding: 8px;
       border-radius: 5px;
@@ -89,15 +115,29 @@
 </head>
 <body>
 
-<div id="globeViz"></div>
+<!-- Globi në qendër -->
+<div id="globeContainer">
+  <div id="globeViz"></div>
+</div>
 
-<!-- Buttons -->
+<!-- Kategoritë rreth globit -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
+
+<!-- Butonat kryesorë -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
+<button id="adminToggle" class="top-button">Admin</button>
 
-<!-- Filters -->
+<!-- Filtri -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -122,22 +162,10 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Orbit categories -->
-<div id="categoryCircle">
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
-
-<!-- Libraries -->
+<!-- Libraritë -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -160,7 +188,9 @@
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
-    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
+    .pointOfView({ lat: 20, lng: 0, altitude: 1.5 })
+    .enableZoom(false)
+    .enablePointerInteraction(false);
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -269,14 +299,21 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
+  // Klikimi mbi globin hap panelin e kërkimit
+  document.getElementById('globeContainer').onclick = () => {
+    const panel = document.getElementById('filterPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Vendos butonat rreth globit
   const orbitButtons = document.querySelectorAll('.orbit-button');
   const radius = 160;
   orbitButtons.forEach((btn, i) => {
     const angle = (i / orbitButtons.length) * 2 * Math.PI;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
-    btn.style.left = `${250 + x - 50}px`;
-    btn.style.top = `${250 + y - 50}px`;
+    btn.style.left = `${200 + x - 45}px`;
+    btn.style.top = `${200 + y - 45}px`;
   });
 
   if (checkAdmin()) showAdminPanel();
@@ -288,4 +325,3 @@
 
 </body>
 </html>
-<!-- mbaron index.html -->
