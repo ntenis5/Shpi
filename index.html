@@ -111,8 +111,8 @@
 
   <div id="searchPanel">
     <h3>Zgjidh Lokacionin</h3>
-    <input id="stateInput" placeholder="Shteti" autocomplete="off" />
-    <input id="cityInput" placeholder="Qyteti" autocomplete="off" />
+    <input id="stateInput" placeholder="Shteti" />
+    <input id="cityInput" placeholder="Qyteti" />
     <button onclick="goToMap()">Kërko Pronat</button>
   </div>
 
@@ -173,8 +173,8 @@
     }
 
     async function loadProperties() {
-      const propertySnap = await getDocs(propertyCol);
-      allProperties = propertySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const snap = await getDocs(propertyCol);
+      allProperties = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderPoints(allProperties);
     }
 
@@ -197,7 +197,6 @@
       window.location.href = `map.html?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`;
     };
 
-    // Pozicionimi i butonave rreth globit
     const orbitButtons = document.querySelectorAll('.orbit-button');
     const radius = 160;
     orbitButtons.forEach((btn, i) => {
@@ -208,7 +207,6 @@
       btn.style.top = `${300 + y - 50}px`;
     });
 
-    // Ngarkimi fillestar i pronave
     loadProperties();
   </script>
 </body>
