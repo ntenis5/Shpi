@@ -41,10 +41,22 @@
     #saleBtn { left: 10px; }
     #searchToggle { left: 100px; }
     #rentBtn { left: 200px; }
+    #startBtn {
+      left: 50%;
+      transform: translateX(-50%);
+      background: green;
+      color: white;
+    }
     #adminToggle {
       right: 10px;
       background: crimson;
       color: white;
+    }
+    #resetBtn {
+      right: 120px;
+      background: gray;
+      color: white;
+      display: none;
     }
     #categoryCircle {
       position: absolute;
@@ -95,6 +107,8 @@
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
 <button id="adminToggle" class="top-button">Admin</button>
+<button id="startBtn" class="top-button">START</button>
+<button id="resetBtn" class="top-button">Rifillo</button>
 
 <!-- Filters -->
 <div id="filterPanel">
@@ -161,6 +175,8 @@
   const propertyCol = collection(db, "properties");
 
   let allProperties = [];
+  let selectedCategory = "";
+  let selectedType = "";
 
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
@@ -235,9 +251,44 @@
   };
 
   function filterByCategory(cat) {
-    document.getElementById("filter-category").value = cat;
-    applyFilters();
+    selectedCategory = cat;
   }
+
+  document.getElementById('saleBtn').onclick = () => selectedType = "sale";
+  document.getElementById('rentBtn').onclick = () => selectedType = "rent";
+
+  document.getElementById('startBtn').onclick = () => {
+    let filtered = allProperties;
+
+    if (selectedType) {
+      filtered = filtered.filter(p => p.type === selectedType);
+    }
+    if (selectedCategory) {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
+    renderPoints(filtered);
+
+    document.getElementById('saleBtn').style.display = 'none';
+    document.getElementById('rentBtn').style.display = 'none';
+    document.getElementById('searchToggle').style.display = 'none';
+    document.getElementById('categoryCircle').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display = 'block';
+  };
+
+  document.getElementById('resetBtn').onclick = () => {
+    selectedType = '';
+    selectedCategory = '';
+    renderPoints(allProperties);
+
+    document.getElementById('saleBtn').style.display = 'block';
+    document.getElementById('rentBtn').style.display = 'block';
+    document.getElementById('searchToggle').style.display = 'block';
+    document.getElementById('categoryCircle').style.display = 'block';
+    document.getElementById('startBtn').style.display = 'block';
+    document.getElementById('resetBtn').style.display = 'none';
+  };
 
   function checkAdmin() {
     return localStorage.getItem("isAdmin") === "true";
@@ -273,16 +324,6 @@
   document.getElementById('searchToggle').onclick = () => {
     const panel = document.getElementById('filterPanel');
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  };
-
-  document.getElementById('saleBtn').onclick = () => {
-    const filtered = allProperties.filter(p => p.type === 'sale');
-    renderPoints(filtered);
-  };
-
-  document.getElementById('rentBtn').onclick = () => {
-    const filtered = allProperties.filter(p => p.type === 'rent');
-    renderPoints(filtered);
   };
 
   const orbitButtons = document.querySelectorAll('.orbit-button');
