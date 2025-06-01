@@ -12,16 +12,18 @@
       color: white;
       overflow: hidden;
     }
+
     #globeContainer {
       position: absolute;
-      width: 400px;
-      height: 400px;
+      width: 300px;
+      height: 300px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1;
+      z-index: 2;
       pointer-events: none;
     }
+
     #globeViz {
       width: 100%;
       height: 100%;
@@ -40,6 +42,7 @@
       cursor: pointer;
       z-index: 10;
     }
+
     #saleBtn { left: 10px; }
     #searchToggle { left: 100px; }
     #rentBtn { left: 200px; }
@@ -55,10 +58,9 @@
       height: 600px;
       top: 50%;
       left: 50%;
-      margin-left: -300px;
-      margin-top: -300px;
+      transform: translate(-50%, -50%);
       pointer-events: none;
-      z-index: 2;
+      z-index: 1;
     }
 
     .orbit-button {
@@ -72,6 +74,10 @@
       border: none;
       pointer-events: auto;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     .orbit-button:hover {
@@ -96,6 +102,7 @@
       border-radius: 5px;
       border: none;
     }
+
     button {
       padding: 8px;
       border-radius: 5px;
@@ -105,18 +112,29 @@
 </head>
 <body>
 
-<!-- Buttons -->
+<!-- Globi në qendër -->
+<div id="globeContainer">
+  <div id="globeViz"></div>
+</div>
+
+<!-- Rrethi me kategoritë -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
+
+<!-- Butonat sipër -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
 <button id="adminToggle" class="top-button">Admin</button>
 
-<!-- Globe Container -->
-<div id="globeContainer">
-  <div id="globeViz"></div>
-</div>
-
-<!-- Filters -->
+<!-- Panelet -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -130,7 +148,6 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Admin Panel -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -141,22 +158,11 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Orbit categories -->
-<div id="categoryCircle">
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
-
-<!-- Libraries -->
+<!-- Libraritë -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase -->
+<!-- Firebase & Funksione -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -173,15 +179,14 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const propertyCol = collection(db, "properties");
-
   let allProperties = [];
 
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
-    .pointOfView({ lat: 20, lng: 0, altitude: 2 })
+    .pointOfView({ lat: 0, lng: 0, altitude: 1.5 }, 0)
     .enableZoom(false)
-    .controls().enableRotate = false;
+    .controls().enableRotate = true;
 
   function renderPoints(data) {
     globe.pointsData(data)
