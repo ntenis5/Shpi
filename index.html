@@ -25,7 +25,6 @@
       cursor: pointer;
     }
 
-    /* Orbit buttons container */
     #orbitContainer {
       position: relative;
       width: 600px;
@@ -55,7 +54,6 @@
       transform: scale(1.1);
     }
 
-    /* Modal search panel */
     #searchPanel {
       display: none;
       position: fixed;
@@ -96,12 +94,29 @@
     #searchPanel button:hover {
       background: #ffb347;
     }
+
+    #closePanel {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: transparent;
+      color: orange;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 700px) {
+      #orbitContainer {
+        transform: scale(0.7);
+        transform-origin: top center;
+      }
+    }
   </style>
 </head>
 <body>
 
   <div id="orbitContainer">
-    <!-- Orbit buttons (kategoritë) do vendosen nga JS -->
     <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
     <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
     <button class="orbit-button" onclick="filterByCategory('Tokë')">Tokë</button>
@@ -112,21 +127,19 @@
     <div id="globeViz"></div>
   </div>
 
-  <!-- Modal panel për kërkim -->
   <div id="searchPanel">
+    <button id="closePanel" onclick="closeSearchPanel()">✖</button>
     <h3>Zgjidh Lokacionin</h3>
     <input id="stateInput" placeholder="Shteti" autocomplete="off" />
     <input id="cityInput" placeholder="Qyteti" autocomplete="off" />
     <button onclick="goToMap()">Kërko Pronat</button>
   </div>
 
-  <!-- Firebase + Globe + Kod JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import Globe from 'https://cdn.jsdelivr.net/npm/three-globe@2.24.8/dist/three-globe.module.js';
 
-    // Firebase konfigurimi
     const firebaseConfig = {
       apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
       authDomain: "shpi-d4e2d.firebaseapp.com",
@@ -136,60 +149,56 @@
       appId: "1:600471884377:web:5512544dc9dfb1fa009748"
     };
 
-    // Inicimi i Firebase dhe Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const propertyCol = collection(db, "properties");
     let allProperties = [];
 
-    // Inicializimi i globit në divin e vogël
     const globe = Globe()(document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .backgroundColor('#00000000') // transparent, sepse kemi background te body
+      .backgroundColor('#00000000')
       .pointOfView({ lat: 20, lng: 0, altitude: 2 })
       .width(300)
       .height(300);
 
-    // Përcakto pozicionet orbitale të butonave rreth globit
     const orbitButtons = document.querySelectorAll('.orbit-button');
-    const radius = 160; // rrethi me radius 160px
+    const radius = 200;
     orbitButtons.forEach((btn, i) => {
       const angle = (i / orbitButtons.length) * 2 * Math.PI;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
-      btn.style.left = `${300 + x - 50}px`; // 300 është gjysma e orbitContainer 600
+      btn.style.left = `${300 + x - 50}px`;
       btn.style.top = `${300 + y - 50}px`;
     });
 
-    // Funksion për të vizatuar pikat (pronat) në glob
     function renderPoints(data) {
       globe.pointsData(data)
-        .pointLat(d => d.lat)
-        .pointLng(d => d.lng)
+        .pointLat(d => d.lat ?? 0)
+        .pointLng(d => d.lng ?? 0)
         .pointAltitude(0.05)
         .pointColor(() => 'orange')
-        .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
+        .pointLabel(d => `${d.category || 'Kategori'}<br>${d.city || 'Qytet'}<br>€${d.price || '???'}`);
     }
 
-    // Ngarko pronat nga Firestore dhe ruaj në allProperties
     async function loadProperties() {
       const propertySnap = await getDocs(propertyCol);
       allProperties = propertySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderPoints(allProperties);
     }
 
-    // Funksion për filtrimin sipas kategorisë
     window.filterByCategory = function (cat) {
-      const filtered = allProperties.filter(p => p.category.toLowerCase() === cat.toLowerCase());
+      const filtered = allProperties.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase());
       renderPoints(filtered);
     };
 
-    // Klikim mbi globin hap panelin e kërkimit
     document.getElementById('globeContainer').addEventListener('click', () => {
       document.getElementById('searchPanel').style.display = 'block';
     });
 
-    // Funksion që dërgon në faqen me hartë
+    window.closeSearchPanel = function () {
+      document.getElementById('searchPanel').style.display = 'none';
+    };
+
     window.goToMap = function () {
       const city = document.getElementById('cityInput').value.trim();
       const state = document.getElementById('stateInput').value.trim();
@@ -199,13 +208,10 @@
         return;
       }
 
-      // Hap faqen me hartë dhe filtro pronat sipas qytetit dhe shtetit
       window.location.href = `map.html?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`;
     };
 
-    // Fillimisht ngarko pronat dhe vizato globin
     loadProperties();
-
   </script>
 </body>
 </html>
