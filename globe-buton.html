@@ -6,20 +6,13 @@
   <style>
     html, body {
       margin: 0;
-      padding: 0;
       height: 100%;
-      width: 100%;
-      background-color: #000;
-      font-family: sans-serif;
-    }
-
-    .container {
-      height: 100%;
-      width: 100%;
+      background: black;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       flex-direction: column;
+      font-family: sans-serif;
     }
 
     #globeButton {
@@ -28,12 +21,13 @@
       background-color: orange;
       border-radius: 50%;
       border: none;
-      font-size: 50px;
-      cursor: pointer;
+      font-size: 48px;
+      color: black;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 0 20px orange;
+      cursor: pointer;
+      box-shadow: 0 0 15px orange;
       transition: transform 0.2s;
     }
 
@@ -44,39 +38,37 @@
     #searchPanel {
       display: none;
       margin-top: 20px;
-      background-color: rgba(255, 255, 255, 0.95);
+      background: rgba(255,255,255,0.95);
       padding: 20px;
       border-radius: 10px;
       color: black;
     }
 
     #searchPanel input {
-      margin: 5px 0;
-      padding: 8px;
+      display: block;
+      margin-bottom: 10px;
       width: 200px;
+      padding: 8px;
     }
 
     #searchPanel button {
-      margin-top: 10px;
       padding: 8px 12px;
       background: orange;
       border: none;
-      font-weight: bold;
       border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <button id="globeButton">🌍</button>
+  <button id="globeButton">🌍</button>
 
-    <div id="searchPanel">
-      <input type="text" placeholder="Qyteti">
-      <input type="text" placeholder="Shteti">
-      <button>Kërko</button>
-    </div>
+  <div id="searchPanel">
+    <input type="text" placeholder="Qyteti">
+    <input type="text" placeholder="Shteti">
+    <button>Kërko</button>
   </div>
 
   <script>
@@ -84,11 +76,7 @@
     const searchPanel = document.getElementById('searchPanel');
 
     globeButton.addEventListener('click', () => {
-      if (searchPanel.style.display === 'none' || searchPanel.style.display === '') {
-        searchPanel.style.display = 'block';
-      } else {
-        searchPanel.style.display = 'none';
-      }
+      searchPanel.style.display = searchPanel.style.display === 'block' ? 'none' : 'block';
     });
   </script>
 
