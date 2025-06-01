@@ -4,115 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Paneli i Pronave me Glob</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #121212;
-      color: white;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
-
-    #globeContainer {
-      width: 300px;
-      height: 300px;
-      margin: 40px auto 10px;
-      position: relative;
-      border-radius: 50%;
-      overflow: hidden;
-      box-shadow: 0 0 15px orange;
-      cursor: pointer;
-    }
-
-    #orbitContainer {
-      position: relative;
-      width: 600px;
-      height: 600px;
-      margin: 0 auto;
-    }
-
-    .orbit-button {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: orange;
-      color: black;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-      box-shadow: 0 0 8px #ffb347;
-      transition: transform 0.2s ease;
-    }
-
-    .orbit-button:hover {
-      transform: scale(1.1);
-    }
-
-    #searchPanel {
-      display: none;
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #222;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(255, 165, 0, 0.8);
-      z-index: 1000;
-      width: 320px;
-    }
-
-    #searchPanel input {
-      width: 100%;
-      margin-bottom: 15px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: none;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-
-    #searchPanel button {
-      width: 100%;
-      padding: 10px 0;
-      background: orange;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      color: black;
-      font-size: 16px;
-      transition: background 0.3s ease;
-    }
-
-    #searchPanel button:hover {
-      background: #ffb347;
-    }
-
-    #closePanel {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      background: transparent;
-      color: orange;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 700px) {
-      #orbitContainer {
-        transform: scale(0.7);
-        transform-origin: top center;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -128,7 +20,6 @@
   </div>
 
   <div id="searchPanel">
-    <button id="closePanel" onclick="closeSearchPanel()">✖</button>
     <h3>Zgjidh Lokacionin</h3>
     <input id="stateInput" placeholder="Shteti" autocomplete="off" />
     <input id="cityInput" placeholder="Qyteti" autocomplete="off" />
@@ -136,10 +27,12 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
     import Globe from 'https://cdn.jsdelivr.net/npm/three-globe@2.24.8/dist/three-globe.module.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
+    // Konfigurimi i Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
       authDomain: "shpi-d4e2d.firebaseapp.com",
@@ -149,20 +42,23 @@
       appId: "1:600471884377:web:5512544dc9dfb1fa009748"
     };
 
+    // Inicimi i Firebase dhe Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const propertyCol = collection(db, "properties");
     let allProperties = [];
 
-    const globe = Globe()(document.getElementById('globeViz'))
+    // Inicializimi i globit
+    const globe = Globe({ THREE })(document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .backgroundColor('#00000000')
       .pointOfView({ lat: 20, lng: 0, altitude: 2 })
       .width(300)
       .height(300);
 
+    // Përcaktimi i pozicioneve të butonave rreth globit
     const orbitButtons = document.querySelectorAll('.orbit-button');
-    const radius = 200;
+    const radius = 160;
     orbitButtons.forEach((btn, i) => {
       const angle = (i / orbitButtons.length) * 2 * Math.PI;
       const x = Math.cos(angle) * radius;
@@ -171,34 +67,35 @@
       btn.style.top = `${300 + y - 50}px`;
     });
 
+    // Funksioni për të vizatuar pikat në glob
     function renderPoints(data) {
       globe.pointsData(data)
-        .pointLat(d => d.lat ?? 0)
-        .pointLng(d => d.lng ?? 0)
+        .pointLat(d => d.lat)
+        .pointLng(d => d.lng)
         .pointAltitude(0.05)
         .pointColor(() => 'orange')
-        .pointLabel(d => `${d.category || 'Kategori'}<br>${d.city || 'Qytet'}<br>€${d.price || '???'}`);
+        .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price}`);
     }
 
+    // Ngarkimi i pronave nga Firestore
     async function loadProperties() {
       const propertySnap = await getDocs(propertyCol);
       allProperties = propertySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderPoints(allProperties);
     }
 
+    // Filtrimi sipas kategorisë
     window.filterByCategory = function (cat) {
-      const filtered = allProperties.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase());
+      const filtered = allProperties.filter(p => p.category.toLowerCase() === cat.toLowerCase());
       renderPoints(filtered);
     };
 
+    // Klikimi mbi globin hap panelin e kërkimit
     document.getElementById('globeContainer').addEventListener('click', () => {
       document.getElementById('searchPanel').style.display = 'block';
     });
 
-    window.closeSearchPanel = function () {
-      document.getElementById('searchPanel').style.display = 'none';
-    };
-
+    // Funksioni për të kaluar në faqen e hartës
     window.goToMap = function () {
       const city = document.getElementById('cityInput').value.trim();
       const state = document.getElementById('stateInput').value.trim();
@@ -211,7 +108,9 @@
       window.location.href = `map.html?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`;
     };
 
+    // Ngarkimi fillestar i pronave
     loadProperties();
+
   </script>
 </body>
 </html>
