@@ -1,62 +1,39 @@
-body {
+/* Reset bazë */
+* {
   margin: 0;
-  font-family: sans-serif;
-  background: #000;
-  color: white;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-#globeViz {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
+/* Trupi i faqes */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  overflow-x: hidden;
 }
 
-#filterPanel, #adminPanel {
-  position: absolute;
-  top: 70px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 10px;
-  border-radius: 8px;
-  display: none;
-  z-index: 10;
-}
-
-.top-button {
-  position: absolute;
-  top: 10px;
-  padding: 8px 16px;
-  background: orange;
-  color: black;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
+/* Kontejneri i globit */
+#globeContainer {
+  width: 300px;
+  height: 300px;
+  margin: 40px auto 10px;
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 15px orange;
   cursor: pointer;
-  z-index: 10;
 }
 
-#saleBtn { left: 10px; }
-#searchToggle { left: 100px; }
-#rentBtn { left: 200px; }
-
-#adminToggle {
-  right: 10px;
-  background: crimson;
-  color: white;
+/* Orbit i butonave */
+#orbitContainer {
+  position: relative;
+  width: 600px;
+  height: 600px;
+  margin: 0 auto;
 }
 
-#categoryCircle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 500px;
-  height: 500px;
-  margin-left: -250px;
-  margin-top: -250px;
-  pointer-events: none;
-  z-index: 5;
-}
-
+/* Butonat që rrethojnë globin */
 .orbit-button {
   position: absolute;
   width: 100px;
@@ -66,20 +43,77 @@ body {
   color: black;
   font-weight: bold;
   border: none;
-  pointer-events: auto;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  box-shadow: 0 0 8px #ffb347;
+  transition: transform 0.2s ease, background 0.3s ease;
 }
 
-input, select {
+.orbit-button:hover {
+  transform: scale(1.1);
+  background: #ffa726;
+}
+
+/* Paneli për kërkim (modal) */
+#searchPanel {
+  display: none;
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(255, 165, 0, 0.8);
+  z-index: 1000;
+  width: 320px;
+}
+
+#searchPanel h3 {
+  margin-bottom: 20px;
+  color: orange;
+  text-align: center;
+}
+
+#searchPanel input {
   width: 100%;
-  margin-bottom: 5px;
-  padding: 6px;
-  border-radius: 5px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 6px;
   border: none;
+  font-size: 16px;
+  background: #333;
+  color: white;
 }
 
-button {
-  padding: 8px;
-  border-radius: 5px;
+#searchPanel button {
+  width: 100%;
+  padding: 10px 0;
+  background: orange;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
   cursor: pointer;
+  color: black;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+#searchPanel button:hover {
+  background: #ffb347;
+}
+
+/* Stili për map.html */
+#map {
+  height: 100vh;
+  width: 100%;
+}
+
+/* Popup në hartë */
+.leaflet-popup-content {
+  font-size: 14px;
+  color: #111;
 }
