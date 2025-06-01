@@ -1,131 +1,291 @@
+<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Paneli i Administratorit</title>
+  <title>Prona në Glob</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #000;
+      color: white;
+    }
+    #globeViz {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+    }
+    #filterPanel, #adminPanel {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      z-index: 10;
+    }
+    .top-button {
+      position: absolute;
+      top: 10px;
+      padding: 8px 16px;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 10;
+    }
+    #saleBtn { left: 10px; }
+    #searchToggle { left: 100px; }
+    #rentBtn { left: 200px; }
+    #adminToggle {
+      right: 10px;
+      background: crimson;
+      color: white;
+    }
+    #categoryCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 500px;
+      height: 500px;
+      margin-left: -250px;
+      margin-top: -250px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .orbit-button {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .orbit-button:hover {
+      background: darkorange;
+    }
+    input, select {
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 6px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>Hyr si Administrator</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Fjalëkalimi" />
-  <button onclick="login()">Hyr</button>
 
-  <div id="adminPanel" style="display:none">
-    <h2>Shto / Menaxho Pronat</h2>
-    <form id="addPropertyForm">
-      <input type="text" id="title" placeholder="Titulli" required /><br />
-      <input type="text" id="location" placeholder="Vendndodhja" required /><br />
-      <textarea id="description" placeholder="Përshkrimi"></textarea><br />
-      <button type="submit">Shto Pronë</button>
-    </form>
+<div id="globeViz"></div>
 
-    <h3>Lista e Pronave</h3>
-    <div id="propertyList"></div>
-  </div>
+<!-- Buttons -->
+<button id="saleBtn" class="top-button">Sale</button>
+<button id="searchToggle" class="top-button">Search</button>
+<button id="rentBtn" class="top-button">Rent</button>
+<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+<!-- Filters -->
+<div id="filterPanel">
+  <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
+  <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
+  <input type="number" id="filter-price" placeholder="Çmimi max">
+  <input type="number" id="filter-min-price" placeholder="Çmimi min">
+  <select id="filter-sort">
+    <option value="">Rendit sipas</option>
+    <option value="asc">Çmimi në rritje</option>
+    <option value="desc">Çmimi në zbritje</option>
+  </select>
+  <button onclick="applyFilters()">Filtro</button>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
-      authDomain: "shpi-df1ff.firebaseapp.com",
-      projectId: "shpi-df1ff",
-      storageBucket: "shpi-df1ff.appspot.com",
-      messagingSenderId: "983229738097",
-      appId: "1:983229738097:web:3822cf4e012755c9d6bfd0"
-    };
+<!-- Admin Panel -->
+<div id="adminPanel">
+  <h4>Shto Pronë</h4>
+  <input type="text" id="new-category" placeholder="Kategoria">
+  <input type="text" id="new-city" placeholder="Qyteti/Shteti">
+  <input type="number" id="new-price" placeholder="Çmimi">
+  <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
+  <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
+  <button onclick="addProperty()">Publiko</button>
+</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+<!-- Orbit categories -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
 
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+<!-- Libraries -->
+<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/globe.gl"></script>
 
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => alert("Hyrje e suksesshme!"))
-        .catch(error => alert("Gabim: " + error.message));
-    }
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-    auth.onAuthStateChanged(user => {
-      if (user && user.email === "nteniskotsiou@gmail.com") {
-        document.getElementById("adminPanel").style.display = "block";
-        loadProperties();
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
+    authDomain: "shpi-d4e2d.firebaseapp.com",
+    projectId: "shpi-d4e2d",
+    storageBucket: "shpi-d4e2d.appspot.com",
+    messagingSenderId: "600471884377",
+    appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+  };
 
-        document.getElementById("addPropertyForm").addEventListener("submit", function(e) {
-          e.preventDefault();
-          const title = document.getElementById("title").value;
-          const location = document.getElementById("location").value;
-          const description = document.getElementById("description").value;
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const propertyCol = collection(db, "properties");
 
-          db.collection("prona").add({
-            title,
-            location,
-            description,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          })
-          .then(() => {
-            alert("Prona u shtua me sukses!");
-            document.getElementById("addPropertyForm").reset();
-            loadProperties();
-          })
-          .catch(err => alert("Gabim gjatë shtimit: " + err.message));
-        });
+  let allProperties = [];
 
-      } else if (user) {
-        document.body.innerHTML = "<h3>Nuk ke të drejtë të hysh si administrator.</h3>";
-      }
+  const globe = Globe()(document.getElementById('globeViz'))
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .backgroundColor('#000')
+    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
+
+  function renderPoints(data) {
+    globe.pointsData(data)
+      .pointLat(d => d.lat)
+      .pointLng(d => d.lng)
+      .pointAltitude(0.05)
+      .pointColor(() => 'orange')
+      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price.toLocaleString('sq-AL')}`);
+    updateCategoryFilter(data);
+  }
+
+  function updateCategoryFilter(data) {
+    const categories = [...new Set(data.map(p => p.category))];
+    const select = document.getElementById("filter-category");
+    select.innerHTML = '<option value="">Të gjitha kategoritë</option>';
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      select.appendChild(opt);
+    });
+  }
+
+  function applyFilters() {
+    const fCategory = document.getElementById("filter-category").value.toLowerCase();
+    const fCity = document.getElementById("filter-city").value.toLowerCase();
+    const fMax = parseFloat(document.getElementById("filter-price").value);
+    const fMin = parseFloat(document.getElementById("filter-min-price").value);
+    const sort = document.getElementById("filter-sort").value;
+
+    let filtered = allProperties.filter(p => {
+      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
+             (!fCity || p.city.toLowerCase().includes(fCity)) &&
+             (!fMax || p.price <= fMax) &&
+             (!fMin || p.price >= fMin);
     });
 
-    function loadProperties() {
-      const container = document.getElementById("propertyList");
-      container.innerHTML = "";
-      db.collection("prona").orderBy("createdAt", "desc").get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.innerHTML = `
-              <hr>
-              <strong>${data.title}</strong> (${data.location})<br>
-              <small>${data.description}</small><br>
-              <button onclick="deleteProperty('${doc.id}')">Fshi</button>
-              <button onclick="editProperty('${doc.id}', \`${data.title}\`, \`${data.location}\`, \`${data.description}\`)">Edito</button>
-            `;
-            container.appendChild(div);
-          });
-        });
-    }
+    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
+    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
 
-    function deleteProperty(id) {
-      if (confirm("A je i sigurt?")) {
-        db.collection("prona").doc(id).delete().then(() => {
-          alert("Prona u fshi");
-          loadProperties();
-        });
+    renderPoints(filtered);
+  }
+
+  window.addProperty = async function () {
+    try {
+      const category = document.getElementById("new-category").value;
+      const city = document.getElementById("new-city").value;
+      const price = parseFloat(document.getElementById("new-price").value);
+      const lat = parseFloat(document.getElementById("new-lat").value);
+      const lng = parseFloat(document.getElementById("new-lng").value);
+
+      if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+        alert("Plotëso të gjitha fushat.");
+        return;
+      }
+
+      const newProp = { category, city, price, lat, lng };
+      await addDoc(propertyCol, newProp);
+      alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
+      allProperties.push(newProp);
+      renderPoints(allProperties);
+    } catch (err) {
+      console.error(err);
+      alert("Gabim gjatë shtimit.");
+    }
+  };
+
+  function filterByCategory(cat) {
+    document.getElementById("filter-category").value = cat;
+    applyFilters();
+  }
+
+  function checkAdmin() {
+    return localStorage.getItem("isAdmin") === "true";
+  }
+
+  function showAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'block';
+  }
+
+  function hideAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+
+  document.getElementById('adminToggle').onclick = () => {
+    if (checkAdmin()) {
+      if (confirm("Dëshiron të çlogohesh?")) {
+        localStorage.removeItem("isAdmin");
+        hideAdminPanel();
+      }
+    } else {
+      const user = prompt("Përdoruesi:");
+      const pass = prompt("Fjalëkalimi:");
+      if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
+        alert("U logove me sukses si admin!");
+        localStorage.setItem("isAdmin", "true");
+        showAdminPanel();
+      } else {
+        alert("Kredencialet janë të gabuara.");
       }
     }
+  };
 
-    function editProperty(id, title, location, description) {
-      const newTitle = prompt("Titulli i ri", title);
-      const newLocation = prompt("Vendndodhja e re", location);
-      const newDescription = prompt("Përshkrimi i ri", description);
-      if (newTitle && newLocation && newDescription) {
-        db.collection("prona").doc(id).update({
-          title: newTitle,
-          location: newLocation,
-          description: newDescription
-        }).then(() => {
-          alert("Prona u ndryshua");
-          loadProperties();
-        });
-      }
-    }
-  </script>
+  document.getElementById('searchToggle').onclick = () => {
+    const panel = document.getElementById('filterPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  const orbitButtons = document.querySelectorAll('.orbit-button');
+  const radius = 160;
+  orbitButtons.forEach((btn, i) => {
+    const angle = (i / orbitButtons.length) * 2 * Math.PI;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    btn.style.left = `${250 + x - 50}px`;
+    btn.style.top = `${250 + y - 50}px`;
+  });
+
+  if (checkAdmin()) showAdminPanel();
+
+  const propertySnap = await getDocs(propertyCol);
+  allProperties = propertySnap.docs.map(doc => doc.data());
+  renderPoints(allProperties);
+</script>
+
 </body>
 </html>
+<!-- mbaron index.html -->
