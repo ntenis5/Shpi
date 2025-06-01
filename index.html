@@ -12,7 +12,7 @@
       color: white;
       overflow: hidden;
     }
-    #globeContainer {
+    #container {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -20,13 +20,13 @@
       height: 500px;
       margin-left: -250px;
       margin-top: -250px;
-      user-select: none;
+      border-radius: 50%;
+      z-index: 1;
     }
     #globeViz {
       width: 100%;
       height: 100%;
-      position: relative;
-      z-index: 1;
+      border-radius: 50%;
     }
     #filterPanel, #adminPanel {
       position: absolute;
@@ -37,7 +37,6 @@
       border-radius: 8px;
       display: none;
       z-index: 10;
-      max-width: 250px;
     }
     .top-button {
       position: absolute;
@@ -50,7 +49,6 @@
       border-radius: 5px;
       cursor: pointer;
       z-index: 10;
-      user-select: none;
     }
     #saleBtn { left: 10px; }
     #searchToggle { left: 100px; }
@@ -70,7 +68,6 @@
       margin-top: -250px;
       pointer-events: none;
       z-index: 5;
-      user-select: none;
     }
     .orbit-button {
       position: absolute;
@@ -83,12 +80,7 @@
       border: none;
       pointer-events: auto;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       text-align: center;
-      user-select: none;
-      transition: background 0.3s ease;
     }
     .orbit-button:hover {
       background: darkorange;
@@ -99,39 +91,26 @@
       padding: 6px;
       border-radius: 5px;
       border: none;
-      font-size: 14px;
     }
     button {
       padding: 8px;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-<!-- Konteneri qendror për globin dhe orbitën -->
-<div id="globeContainer">
+<!-- Qendra e globit -->
+<div id="container">
   <div id="globeViz"></div>
-
-  <!-- Orbit categories -->
-  <div id="categoryCircle">
-    <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-    <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-    <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-    <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-    <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-    <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-    <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-  </div>
 </div>
 
 <!-- Buttons -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
+<button id="adminToggle" class="top-button">Admin</button>
 
 <!-- Filters -->
 <div id="filterPanel">
@@ -158,6 +137,17 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
+<!-- Orbit categories -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
+
 <!-- Libraries -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
@@ -182,13 +172,14 @@
 
   let allProperties = [];
 
-  // Inicializo globin me përmasa 100% të kontainerit 500x500
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
-    .pointOfView({ lat: 20, lng: 0, altitude: 2 })
-    .width(500)
-    .height(500);
+    .pointOfView({ lat: 20, lng: 0, altitude: 2 }, 0);
+
+  // Çaktivizo zoom dhe rotate
+  globe.controls().enableZoom = false;
+  globe.controls().enableRotate = false;
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -297,20 +288,19 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Vendos butonat në orbitë rreth rrethit 500x500 me radius pak më të madh se gjysma (250px)
+  // Shfaq kategoritë në rreth
   const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 200; // pak më i madh se gjysma e 500px për të qenë jashtë globit
+  const radius = 200;
   orbitButtons.forEach((btn, i) => {
     const angle = (i / orbitButtons.length) * 2 * Math.PI;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
-    btn.style.left = `${250 + x - 50}px`;  // 250 është gjysma e kontainerit, -50 është gjysma e butonit 100x100
+    btn.style.left = `${250 + x - 50}px`;
     btn.style.top = `${250 + y - 50}px`;
   });
 
   if (checkAdmin()) showAdminPanel();
 
-  // Merr pronat nga Firebase dhe i rendit në glob
   const propertySnap = await getDocs(propertyCol);
   allProperties = propertySnap.docs.map(doc => doc.data());
   renderPoints(allProperties);
