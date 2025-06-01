@@ -7,7 +7,7 @@
     html, body {
       margin: 0;
       height: 100%;
-      background: black;
+      background-color: #000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -21,7 +21,7 @@
       background-color: orange;
       border-radius: 50%;
       border: none;
-      font-size: 48px;
+      font-size: 50px;
       color: black;
       display: flex;
       justify-content: center;
@@ -37,11 +37,12 @@
 
     #searchPanel {
       display: none;
-      margin-top: 20px;
-      background: rgba(255,255,255,0.95);
+      margin-top: 30px;
+      background-color: rgba(255,255,255,0.95);
       padding: 20px;
       border-radius: 10px;
       color: black;
+      box-shadow: 0 0 10px white;
     }
 
     #searchPanel input {
@@ -49,6 +50,8 @@
       margin-bottom: 10px;
       width: 200px;
       padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
     #searchPanel button {
@@ -76,7 +79,11 @@
     const searchPanel = document.getElementById('searchPanel');
 
     globeButton.addEventListener('click', () => {
-      searchPanel.style.display = searchPanel.style.display === 'block' ? 'none' : 'block';
+      if (searchPanel.style.display === 'none' || searchPanel.style.display === '') {
+        searchPanel.style.display = 'block';
+      } else {
+        searchPanel.style.display = 'none';
+      }
     });
   </script>
 
