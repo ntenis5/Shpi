@@ -7,65 +7,70 @@
     html, body {
       height: 100%;
       margin: 0;
-      font-family: sans-serif;
+      padding: 0;
       background-color: #000;
+      font-family: sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
 
     #globeButton {
       width: 120px;
       height: 120px;
       background-color: orange;
-      border-radius: 50%;
       border: none;
+      border-radius: 50%;
       font-size: 50px;
       cursor: pointer;
+      box-shadow: 0 0 20px orange;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 0 20px orange;
       transition: transform 0.2s ease;
+      z-index: 10;
     }
 
     #globeButton:hover {
-      transform: scale(1.05);
+      transform: scale(1.1);
     }
 
     #searchPanel {
+      display: none;
       position: absolute;
-      top: calc(50% + 80px);
+      top: calc(50% + 100px);
       background-color: rgba(255, 255, 255, 0.95);
       padding: 20px;
       border-radius: 10px;
-      display: none;
-      box-shadow: 0 0 10px #fff;
+      box-shadow: 0 0 10px white;
       color: #000;
+      z-index: 5;
     }
 
     #searchPanel input {
       display: block;
       margin-bottom: 10px;
-      padding: 8px;
-      width: 220px;
+      padding: 10px;
+      width: 250px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
 
     #searchPanel button {
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
+      padding: 10px 15px;
       background: orange;
+      color: black;
       border: none;
+      border-radius: 5px;
       font-weight: bold;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- Globi si buton -->
+  <!-- Butoni glob -->
   <button id="globeButton">🌍</button>
 
   <!-- Paneli i kërkimit -->
