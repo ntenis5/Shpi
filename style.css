@@ -14,15 +14,18 @@ body {
 }
 
 /* Kontejneri i globit */
-#globeContainer {
-  width: 300px;
-  height: 300px;
-  margin: 40px auto 10px;
-  position: relative;
+#globeViz {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin-left: -100px;
+  margin-top: -100px;
+  pointer-events: auto;
+  z-index: 6;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 0 15px orange;
-  cursor: pointer;
 }
 
 /* Orbit i butonave */
