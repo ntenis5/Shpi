@@ -1,3 +1,4 @@
+<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -10,26 +11,22 @@
       font-family: sans-serif;
       background: #000;
       color: white;
-      overflow: hidden;
     }
-
-    #globeContainer {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      pointer-events: none;
-    }
-
     #globeViz {
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
     }
-
+    #filterPanel, #adminPanel {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      z-index: 10;
+    }
     .top-button {
       position: absolute;
       top: 10px;
@@ -42,7 +39,6 @@
       cursor: pointer;
       z-index: 10;
     }
-
     #saleBtn { left: 10px; }
     #searchToggle { left: 100px; }
     #rentBtn { left: 200px; }
@@ -51,18 +47,17 @@
       background: crimson;
       color: white;
     }
-
     #categoryCircle {
       position: absolute;
-      width: 600px;
-      height: 600px;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      margin-left: -250px;
+      margin-top: -250px;
       pointer-events: none;
-      z-index: 1;
+      z-index: 5;
     }
-
     .orbit-button {
       position: absolute;
       width: 100px;
@@ -74,27 +69,10 @@
       border: none;
       pointer-events: auto;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
     }
-
     .orbit-button:hover {
       background: darkorange;
     }
-
-    #filterPanel, #adminPanel {
-      position: absolute;
-      top: 70px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 8px;
-      display: none;
-      z-index: 10;
-    }
-
     input, select {
       width: 100%;
       margin-bottom: 5px;
@@ -102,7 +80,6 @@
       border-radius: 5px;
       border: none;
     }
-
     button {
       padding: 8px;
       border-radius: 5px;
@@ -112,29 +89,15 @@
 </head>
 <body>
 
-<!-- Globi në qendër -->
-<div id="globeContainer">
-  <div id="globeViz"></div>
-</div>
+<div id="globeViz"></div>
 
-<!-- Rrethi me kategoritë -->
-<div id="categoryCircle">
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
-
-<!-- Butonat sipër -->
+<!-- Buttons -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button">Admin</button>
+<button id="adminToggle" class="top-button" style="right: 10px;">Admin</button>
 
-<!-- Panelet -->
+<!-- Filters -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -148,6 +111,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
+<!-- Admin Panel -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -158,11 +122,22 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Libraritë -->
+<!-- Orbit categories -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
+
+<!-- Libraries -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase & Funksione -->
+<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -179,14 +154,13 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const propertyCol = collection(db, "properties");
+
   let allProperties = [];
 
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
-    .pointOfView({ lat: 0, lng: 0, altitude: 1.5 }, 0)
-    .enableZoom(false)
-    .controls().enableRotate = true;
+    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -296,13 +270,13 @@
   };
 
   const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 250;
+  const radius = 160;
   orbitButtons.forEach((btn, i) => {
     const angle = (i / orbitButtons.length) * 2 * Math.PI;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
-    btn.style.left = `${300 + x - 50}px`;
-    btn.style.top = `${300 + y - 50}px`;
+    btn.style.left = `${250 + x - 50}px`;
+    btn.style.top = `${250 + y - 50}px`;
   });
 
   if (checkAdmin()) showAdminPanel();
@@ -314,3 +288,4 @@
 
 </body>
 </html>
+<!-- mbaron index.html -->
