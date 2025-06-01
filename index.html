@@ -16,27 +16,44 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 500px;
-      height: 500px;
-      margin-left: -250px;
-      margin-top: -250px;
+      width: 250px;
+      height: 250px;
+      transform: translate(-50%, -50%);
       border-radius: 50%;
-      z-index: 1;
+      z-index: 2;
+      pointer-events: none;
     }
     #globeViz {
       width: 100%;
       height: 100%;
       border-radius: 50%;
+      pointer-events: none;
     }
-    #filterPanel, #adminPanel {
+    #categoryCircle {
       position: absolute;
-      top: 70px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 8px;
-      display: none;
-      z-index: 10;
+      top: 50%;
+      left: 50%;
+      width: 400px;
+      height: 400px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .orbit-button {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 3;
+    }
+    .orbit-button:hover {
+      background: darkorange;
     }
     .top-button {
       position: absolute;
@@ -58,32 +75,15 @@
       background: crimson;
       color: white;
     }
-    #categoryCircle {
+    #filterPanel, #adminPanel {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 500px;
-      height: 500px;
-      margin-left: -250px;
-      margin-top: -250px;
-      pointer-events: none;
-      z-index: 5;
-    }
-    .orbit-button {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: orange;
-      color: black;
-      font-weight: bold;
-      border: none;
-      pointer-events: auto;
-      cursor: pointer;
-      text-align: center;
-    }
-    .orbit-button:hover {
-      background: darkorange;
+      top: 70px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      z-index: 10;
     }
     input, select {
       width: 100%;
@@ -101,18 +101,29 @@
 </head>
 <body>
 
-<!-- Qendra e globit -->
+<!-- Container i globit -->
 <div id="container">
   <div id="globeViz"></div>
 </div>
 
-<!-- Buttons -->
+<!-- Orbitë me kategori -->
+<div id="categoryCircle">
+  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+</div>
+
+<!-- Butonat -->
 <button id="saleBtn" class="top-button">Sale</button>
 <button id="searchToggle" class="top-button">Search</button>
 <button id="rentBtn" class="top-button">Rent</button>
 <button id="adminToggle" class="top-button">Admin</button>
 
-<!-- Filters -->
+<!-- Panel Filtrimi -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
   <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
@@ -126,7 +137,7 @@
   <button onclick="applyFilters()">Filtro</button>
 </div>
 
-<!-- Admin Panel -->
+<!-- Panel Admin -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
   <input type="text" id="new-category" placeholder="Kategoria">
@@ -137,22 +148,11 @@
   <button onclick="addProperty()">Publiko</button>
 </div>
 
-<!-- Orbit categories -->
-<div id="categoryCircle">
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
-
-<!-- Libraries -->
+<!-- Libraritë -->
 <script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/globe.gl"></script>
 
-<!-- Firebase -->
+<!-- Firebase + Script -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
@@ -175,11 +175,8 @@
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
-    .pointOfView({ lat: 20, lng: 0, altitude: 2 }, 0);
-
-  // Çaktivizo zoom dhe rotate
-  globe.controls().enableZoom = false;
-  globe.controls().enableRotate = false;
+    .pointOfView({ lat: 20, lng: 0, altitude: 2 })
+    .controls().enableZoom = false;
 
   function renderPoints(data) {
     globe.pointsData(data)
@@ -288,15 +285,14 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Shfaq kategoritë në rreth
   const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 200;
+  const radius = 170;
   orbitButtons.forEach((btn, i) => {
     const angle = (i / orbitButtons.length) * 2 * Math.PI;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
-    btn.style.left = `${250 + x - 50}px`;
-    btn.style.top = `${250 + y - 50}px`;
+    btn.style.left = `${200 + x - 50}px`;
+    btn.style.top = `${200 + y - 50}px`;
   });
 
   if (checkAdmin()) showAdminPanel();
