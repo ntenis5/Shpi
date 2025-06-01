@@ -1,0 +1,73 @@
+<!-- globe-button.html -->
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <title>Globi si Buton</title>
+  <style>
+    body {
+      margin: 0;
+      height: 95vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000;
+      position: relative;
+      font-family: sans-serif;
+    }
+    #globeButton {
+      width: 100px;
+      height: 100px;
+      background-color: orange;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      font-size: 40px;
+    }
+    #searchPanel {
+      display: none;
+      position: absolute;
+      top: 120px;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      color: #000;
+    }
+    input {
+      display: block;
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 200px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<button id="globeButton">🌍</button>
+
+<div id="searchPanel">
+  <input type="text" placeholder="Qyteti">
+  <input type="text" placeholder="Shteti">
+  <button>Kërko</button>
+</div>
+
+<script>
+  const globeButton = document.getElementById('globeButton');
+  const searchPanel = document.getElementById('searchPanel');
+
+  globeButton.addEventListener('click', () => {
+    searchPanel.style.display = searchPanel.style.display === 'block' ? 'none' : 'block';
+  });
+</script>
+
+</body>
+</html>
