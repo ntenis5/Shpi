@@ -4,15 +4,26 @@
   <meta charset="UTF-8">
   <title>Globi si Buton</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
-      height: 100%;
       margin: 0;
       padding: 0;
+      height: 100%;
+      width: 100%;
       background-color: #000;
       font-family: sans-serif;
+    }
+
+    .container {
+      height: 100%;
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       position: relative;
     }
 
@@ -20,8 +31,8 @@
       width: 120px;
       height: 120px;
       background-color: orange;
-      border: none;
       border-radius: 50%;
+      border: none;
       font-size: 50px;
       cursor: pointer;
       box-shadow: 0 0 20px orange;
@@ -29,7 +40,6 @@
       justify-content: center;
       align-items: center;
       transition: transform 0.2s ease;
-      z-index: 10;
     }
 
     #globeButton:hover {
@@ -38,14 +48,12 @@
 
     #searchPanel {
       display: none;
-      position: absolute;
-      top: calc(50% + 100px);
+      margin-top: 30px;
       background-color: rgba(255, 255, 255, 0.95);
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px white;
       color: #000;
-      z-index: 5;
+      box-shadow: 0 0 10px white;
     }
 
     #searchPanel input {
@@ -70,14 +78,14 @@
 </head>
 <body>
 
-  <!-- Butoni glob -->
-  <button id="globeButton">🌍</button>
+  <div class="container">
+    <button id="globeButton">🌍</button>
 
-  <!-- Paneli i kërkimit -->
-  <div id="searchPanel">
-    <input type="text" placeholder="Qyteti">
-    <input type="text" placeholder="Shteti">
-    <button>Kërko</button>
+    <div id="searchPanel">
+      <input type="text" placeholder="Qyteti">
+      <input type="text" placeholder="Shteti">
+      <button>Kërko</button>
+    </div>
   </div>
 
   <script>
@@ -85,7 +93,11 @@
     const searchPanel = document.getElementById('searchPanel');
 
     globeButton.addEventListener('click', () => {
-      searchPanel.style.display = searchPanel.style.display === 'block' ? 'none' : 'block';
+      if (searchPanel.style.display === 'none' || searchPanel.style.display === '') {
+        searchPanel.style.display = 'block';
+      } else {
+        searchPanel.style.display = 'none';
+      }
     });
   </script>
 
