@@ -1,4 +1,3 @@
-<!-- fillon index.html -->
 <!DOCTYPE html>
 <html lang="sq">
 <head>
@@ -16,6 +15,7 @@
       position: absolute;
       width: 100vw;
       height: 100vh;
+      z-index: 1;
     }
     #filterPanel, #adminPanel {
       position: absolute;
@@ -25,7 +25,8 @@
       padding: 10px;
       border-radius: 8px;
       display: none;
-      z-index: 10;
+      z-index: 20;
+      width: 250px;
     }
     .top-button {
       position: absolute;
@@ -37,7 +38,8 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      z-index: 10;
+      z-index: 20;
+      user-select: none;
     }
     #saleBtn { left: 10px; }
     #searchToggle { left: 100px; }
@@ -56,7 +58,7 @@
       margin-left: -250px;
       margin-top: -250px;
       pointer-events: none;
-      z-index: 5;
+      z-index: 10;
     }
     .orbit-button {
       position: absolute;
@@ -69,6 +71,8 @@
       border: none;
       pointer-events: auto;
       cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
     }
     .orbit-button:hover {
       background: darkorange;
@@ -84,21 +88,37 @@
       padding: 8px;
       border-radius: 5px;
       cursor: pointer;
+      user-select: none;
+    }
+
+    /* Glob qendror i vogel ne orbiten e kategorive */
+    #globeCenterButton {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      left: 50%;
+      top: 50%;
+      margin-left: -60px;
+      margin-top: -60px;
+      border-radius: 50%;
+      border: 3px solid white;
+      background-image: url('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      z-index: 15;
+      pointer-events: auto;
+      user-select: none;
+      transition: border-color 0.3s;
+    }
+    #globeCenterButton:hover {
+      border-color: orange;
     }
   </style>
 </head>
 <body>
 
-<div id="categoryCircle">
-  <div id="globeViz"></div>
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
+<div id="globeViz"></div>
 
 <!-- Buttons -->
 <button id="saleBtn" class="top-button">Sale</button>
@@ -133,6 +153,7 @@
 
 <!-- Orbit categories -->
 <div id="categoryCircle">
+  <button id="globeCenterButton" title="Hap Kërkimin"></button>
   <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
   <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
   <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
@@ -166,11 +187,13 @@
 
   let allProperties = [];
 
+  // Inicializo globin 3D
   const globe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
     .backgroundColor('#000')
     .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
+  // Funksion për shfaqje të pikave (pronave)
   function renderPoints(data) {
     globe.pointsData(data)
       .pointLat(d => d.lat)
@@ -181,9 +204,11 @@
     updateCategoryFilter(data);
   }
 
+  // Funksioni për të mbushur dropdown-in e kategorive, vetëm njëherë
   function updateCategoryFilter(data) {
     const categories = [...new Set(data.map(p => p.category))];
     const select = document.getElementById("filter-category");
+    // Fshij përpara çdo herë për të shmangur dyfishimet
     select.innerHTML = '<option value="">Të gjitha kategoritë</option>';
     categories.forEach(cat => {
       const opt = document.createElement("option");
@@ -193,6 +218,7 @@
     });
   }
 
+  // Filtrimi i pronave sipas kritereve
   function applyFilters() {
     const fCategory = document.getElementById("filter-category").value.toLowerCase();
     const fCity = document.getElementById("filter-city").value.toLowerCase();
@@ -213,6 +239,7 @@
     renderPoints(filtered);
   }
 
+  // Funksioni për të shtuar pronë të re
   window.addProperty = async function () {
     try {
       const category = document.getElementById("new-category").value;
@@ -237,64 +264,21 @@
     }
   };
 
+  // Filtron sipas kategorisë kur klikojmë orbit-buttons
   function filterByCategory(cat) {
     document.getElementById("filter-category").value = cat;
     applyFilters();
   }
 
+  // Kontroll admin
   function checkAdmin() {
     return localStorage.getItem("isAdmin") === "true";
   }
-
   function showAdminPanel() {
     document.getElementById('adminPanel').style.display = 'block';
   }
-
   function hideAdminPanel() {
     document.getElementById('adminPanel').style.display = 'none';
   }
 
-  document.getElementById('adminToggle').onclick = () => {
-    if (checkAdmin()) {
-      if (confirm("Dëshiron të çlogohesh?")) {
-        localStorage.removeItem("isAdmin");
-        hideAdminPanel();
-      }
-    } else {
-      const user = prompt("Përdoruesi:");
-      const pass = prompt("Fjalëkalimi:");
-      if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
-        alert("U logove me sukses si admin!");
-        localStorage.setItem("isAdmin", "true");
-        showAdminPanel();
-      } else {
-        alert("Kredencialet janë të gabuara.");
-      }
-    }
-  };
-
-  document.getElementById('searchToggle').onclick = () => {
-    const panel = document.getElementById('filterPanel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  };
-
-  const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 160;
-  orbitButtons.forEach((btn, i) => {
-    const angle = (i / orbitButtons.length) * 2 * Math.PI;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    btn.style.left = `${250 + x - 50}px`;
-    btn.style.top = `${250 + y - 50}px`;
-  });
-
-  if (checkAdmin()) showAdminPanel();
-
-  const propertySnap = await getDocs(propertyCol);
-  allProperties = propertySnap.docs.map(doc => doc.data());
-  renderPoints(allProperties);
-</script>
-
-</body>
-</html>
-<!-- mbaron index.html -->
+  // Login/logout admin toggle
