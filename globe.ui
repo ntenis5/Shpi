@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harta e Pronave</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    #backButton {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: orange;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body><button id="backButton" onclick="history.back()">⟵ Kthehu</button>
+
+  <div id="map"></div>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
+      authDomain: "shpi-d4e2d.firebaseapp.com",
+      projectId: "shpi-d4e2d",
+      storageBucket: "shpi-d4e2d.appspot.com",
+      messagingSenderId: "600471884377",
+      appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const propertyCol = collection(db, "properties");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const cityFilter = urlParams.get("city")?.toLowerCase();
+    const stateFilter = urlParams.get("state")?.toLowerCase();
+
+    const map = L.map('map').setView([41.3275, 19.8189], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    async function loadAndDisplay() {
+      const snap = await getDocs(propertyCol);
+      const props = snap.docs.map(doc => doc.data());
+      const filtered = props.filter(p => {
+        return (!cityFilter || p.city.toLowerCase().includes(cityFilter)) &&
+               (!stateFilter || p.state?.toLowerCase().includes(stateFilter));
+      });
+
+      filtered.forEach(p => {
+        if (!isNaN(p.lat) && !isNaN(p.lng)) {
+          L
