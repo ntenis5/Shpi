@@ -160,6 +160,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
@@ -172,6 +173,7 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
   const propertyCol = collection(db, "properties");
 
   let allProperties = [];
@@ -225,6 +227,12 @@
     renderPoints(filtered);
   }
 
+  async function loadProperties() {
+    const propertySnap = await getDocs(propertyCol);
+    allProperties = propertySnap.docs.map(doc => doc.data());
+    renderPoints(allProperties);
+  }
+
   window.addProperty = async function () {
     try {
       const category = document.getElementById("new-category").value;
@@ -241,9 +249,9 @@
 
       const newProp = { category, city, price, lat, lng, type };
       await addDoc(propertyCol, newProp);
-      alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
-      allProperties.push(newProp);
-      renderPoints(allProperties);
+      alert("Prona u shtua me sukses!");
+
+      await loadProperties(); // Rifreskon të dhënat
     } catch (err) {
       console.error(err);
       alert("Gabim gjatë shtimit.");
@@ -290,10 +298,6 @@
     document.getElementById('resetBtn').style.display = 'none';
   };
 
-  function checkAdmin() {
-    return localStorage.getItem("isAdmin") === "true";
-  }
-
   function showAdminPanel() {
     document.getElementById('adminPanel').style.display = 'block';
   }
@@ -302,46 +306,9 @@
     document.getElementById('adminPanel').style.display = 'none';
   }
 
-  document.getElementById('adminToggle').onclick = () => {
-    if (checkAdmin()) {
+  document.getElementById('adminToggle').onclick = async () => {
+    if (auth.currentUser) {
       if (confirm("Dëshiron të çlogohesh?")) {
-        localStorage.removeItem("isAdmin");
+        await auth.signOut();
         hideAdminPanel();
-      }
-    } else {
-      const user = prompt("Përdoruesi:");
-      const pass = prompt("Fjalëkalimi:");
-      if (user === "nteniskotsiou@gmail.com" && pass === "28Qershor1997") {
-        alert("U logove me sukses si admin!");
-        localStorage.setItem("isAdmin", "true");
-        showAdminPanel();
-      } else {
-        alert("Kredencialet janë të gabuara.");
-      }
-    }
-  };
-
-  document.getElementById('searchToggle').onclick = () => {
-    const panel = document.getElementById('filterPanel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  };
-
-  const orbitButtons = document.querySelectorAll('.orbit-button');
-  const radius = 160;
-  orbitButtons.forEach((btn, i) => {
-    const angle = (i / orbitButtons.length) * 2 * Math.PI;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    btn.style.left = `${250 + x - 50}px`;
-    btn.style.top = `${250 + y - 50}px`;
-  });
-
-  if (checkAdmin()) showAdminPanel();
-
-  const propertySnap = await getDocs(propertyCol);
-  allProperties = propertySnap.docs.map(doc => doc.data());
-  renderPoints(allProperties);
-</script>
-
-</body>
-</html>
+        alert("U çlogove
