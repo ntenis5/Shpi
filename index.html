@@ -100,7 +100,6 @@
 </head>
 <body>
   <div id="globeViz"></div>
-
   <!-- Buttons -->
   <button id="saleBtn" class="top-button">Sale</button> 
   <button id="searchToggle" class="top-button">Search</button> 
@@ -111,15 +110,15 @@
 
   <!-- Filters -->
   <div id="filterPanel">
-    <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
-    <input type="text" id="filter-city" placeholder="Qyteti / Shteti" />
-    <input type="number" id="filter-price" placeholder="Çmimi max" />
-    <input type="number" id="filter-min-price" placeholder="Çmimi min" />
-    <select id="filter-sort">
-      <option value="">Rendit sipas</option>
-      <option value="asc">Çmimi në rritje</option>
-      <option value="desc">Çmimi në zbritje</option>
-    </select>
+    <select id="filter-category"><option value="">Të gjitha kategoritë</option></select> 
+    <input type="text" id="filter-city" placeholder="Qyteti / Shteti" /> 
+    <input type="number" id="filter-price" placeholder="Çmimi max" /> 
+    <input type="number" id="filter-min-price" placeholder="Çmimi min" /> 
+    <select id="filter-sort"> 
+      <option value="">Rendit sipas</option> 
+      <option value="asc">Çmimi në rritje</option> 
+      <option value="desc">Çmimi në zbritje</option> 
+    </select> 
     <button onclick="applyFilters()">Filtro</button>
   </div>
 
@@ -131,14 +130,15 @@
     <input type="number" id="new-price" placeholder="Çmimi" />
     <input type="number" id="new-lat" placeholder="Gjerësia (lat)" />
     <input type="number" id="new-lng" placeholder="Gjatësia (lng)" />
-    <label>
-      Tipi i pronës:
+    <label>Tipi i pronës:
       <select id="new-type">
         <option value="sale">Në shitje</option>
         <option value="rent">Me qira</option>
       </select>
     </label>
     <button onclick="addProperty()">Publiko</button>
+    <hr />
+    <button id="logoutBtn">Dil nga admin</button>
   </div>
 
   <!-- Orbit categories -->
@@ -152,17 +152,14 @@
     <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
   </div>
 
-  <!-- Libraries -->
+  <!-- Firebase & Globe.GL -->
   <script src="https://unpkg.com/three"></script>
   <script src="https://unpkg.com/globe.gl"></script>
-
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
       authDomain: "shpi-d4e2d.firebaseapp.com",
@@ -172,26 +169,20 @@
       appId: "1:600471884377:web:5512544dc9dfb1fa009748"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-
-    // Firestore collection ref
     const propertyCol = collection(db, "properties");
 
-    // Glob variables
     let allProperties = [];
     let selectedCategory = "";
     let selectedType = "";
 
-    // Globe setup
     const globe = Globe()(document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .backgroundColor('#000')
       .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
-    // Render globe points & update category filter dropdown
     function renderPoints(data) {
       globe.pointsData(data)
         .pointLat(d => d.lat)
@@ -199,11 +190,9 @@
         .pointAltitude(0.05)
         .pointColor(() => 'orange')
         .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price.toLocaleString('sq-AL')}`);
-
       updateCategoryFilter(data);
     }
 
-    // Update category dropdown options dynamically
     function updateCategoryFilter(data) {
       const categories = [...new Set(data.map(p => p.category))];
       const select = document.getElementById("filter-category");
@@ -216,8 +205,7 @@
       });
     }
 
-    // Apply filters on properties & render filtered points
-    window.applyFilters = function () {
+    function applyFilters() {
       const fCategory = document.getElementById("filter-category").value.toLowerCase();
       const fCity = document.getElementById("filter-city").value.toLowerCase();
       const fMax = parseFloat(document.getElementById("filter-price").value);
@@ -237,11 +225,10 @@
       renderPoints(filtered);
     }
 
-    // Add new property to Firestore
     window.addProperty = async function () {
       try {
-        const category = document.getElementById("new-category").value.trim();
-        const city = document.getElementById("new-city").value.trim();
+        const category = document.getElementById("new-category").value;
+        const city = document.getElementById("new-city").value;
         const price = parseFloat(document.getElementById("new-price").value);
         const lat = parseFloat(document.getElementById("new-lat").value);
         const lng = parseFloat(document.getElementById("new-lng").value);
@@ -254,46 +241,31 @@
 
         const newProp = { category, city, price, lat, lng, type };
         await addDoc(propertyCol, newProp);
-        alert("Prona u shtua me sukses!");
-
-        // Pas shtimit, fshij fushat e formularit
-        document.getElementById("new-category").value = "";
-        document.getElementById("new-city").value = "";
-        document.getElementById("new-price").value = "";
-        document.getElementById("new-lat").value = "";
-        document.getElementById("new-lng").value = "";
-
-        // Nuk duhet të shtojmë manualisht në allProperties sepse onSnapshot do rifreskojë automatikisht
+        alert("Prona u shtua me sukses! Rifresko faqen për ta parë.");
+        allProperties.push(newProp);
+        renderPoints(allProperties);
       } catch (err) {
         console.error(err);
         alert("Gabim gjatë shtimit.");
       }
-    }
+    };
 
-    // Filter by category button click
-    window.filterByCategory = function(cat) {
+    function filterByCategory(cat) {
       selectedCategory = cat;
-      document.getElementById("filter-category").value = cat;
     }
 
-    // Button handlers for Sale / Rent
-    document.getElementById('saleBtn').onclick = () => {
-      selectedType = "sale";
-      document.getElementById('saleBtn').style.background = "darkorange";
-      document.getElementById('rentBtn').style.background = "orange";
-    };
-    document.getElementById('rentBtn').onclick = () => {
-      selectedType = "rent";
-      document.getElementById('rentBtn').style.background = "darkorange";
-      document.getElementById('saleBtn').style.background = "orange";
-    };
+    document.getElementById('saleBtn').onclick = () => selectedType = "sale";
+    document.getElementById('rentBtn').onclick = () => selectedType = "rent";
 
-    // Start filtering based on selected category & type
     document.getElementById('startBtn').onclick = () => {
       let filtered = allProperties;
 
-      if (selectedType) filtered = filtered.filter(p => p.type === selectedType);
-      if (selectedCategory) filtered = filtered.filter(p => p.category === selectedCategory);
+      if (selectedType) {
+        filtered = filtered.filter(p => p.type === selectedType);
+      }
+      if (selectedCategory) {
+        filtered = filtered.filter(p => p.category === selectedCategory);
+      }
 
       renderPoints(filtered);
 
@@ -305,14 +277,10 @@
       document.getElementById('resetBtn').style.display = 'block';
     };
 
-    // Reset filters and UI
     document.getElementById('resetBtn').onclick = () => {
       selectedType = '';
       selectedCategory = '';
       renderPoints(allProperties);
-
-      document.getElementById('saleBtn').style.background = "orange";
-      document.getElementById('rentBtn').style.background = "orange";
 
       document.getElementById('saleBtn').style.display = 'block';
       document.getElementById('rentBtn').style.display = 'block';
@@ -320,20 +288,61 @@
       document.getElementById('categoryCircle').style.display = 'block';
       document.getElementById('startBtn').style.display = 'block';
       document.getElementById('resetBtn').style.display = 'none';
-
-      // Also clear filters UI
-      document.getElementById("filter-category").value = "";
-      document.getElementById("filter-city").value = "";
-      document.getElementById("filter-price").value = "";
-      document.getElementById("filter-min-price").value = "";
-      document.getElementById("filter-sort").value = "";
     };
 
-    // Toggle search panel
-    document.getElementById('searchToggle').onclick = () => {
-      const panel = document.getElementById('filterPanel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    // Admin panel display control
+    function showAdminPanel() {
+      document.getElementById('adminPanel').style.display = 'block';
+    }
+    function hideAdminPanel() {
+      document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    // Admin login modal (prompt)
+    async function adminLogin() {
+      const email = prompt("Vendos emailin tuaj:");
+      if (!email) return;
+      const password = prompt("Vendos fjalëkalimin:");
+      if (!password) return;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("U logove me sukses si admin!");
+      } catch (error) {
+        alert("Kredencialet janë të gabuara.");
+      }
+    }
+
+    document.getElementById('adminToggle').onclick = async () => {
+      if (auth.currentUser) {
+        // Logout
+        if (confirm("Dëshiron të çlogohesh?")) {
+          await signOut(auth);
+          hideAdminPanel();
+          alert("U çlogove me sukses.");
+        }
+      } else {
+        // Login
+        await adminLogin();
+      }
     };
+
+    document.getElementById('logoutBtn').onclick = async () => {
+      if (auth.currentUser) {
+        await signOut(auth);
+        hideAdminPanel();
+        alert("U çlogove me sukses.");
+      }
+    };
+
+    // Monitor auth state and toggle admin panel accordingly
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        showAdminPanel();
+      } else {
+        hideAdminPanel();
+      }
+    });
 
     // Position orbit buttons in circle
     const orbitButtons = document.querySelectorAll('.orbit-button');
@@ -346,6 +355,15 @@
       btn.style.top = `${250 + y - 50}px`;
     });
 
-    // Firebase Authentication - Admin login/logout logic
-    function showAdminPanel() {
-      document.getElementById
+    // Load all properties from Firestore
+    async function loadProperties() {
+      const propertySnap = await getDocs(propertyCol);
+      allProperties = propertySnap.docs.map(doc => doc.data());
+      renderPoints(allProperties);
+    }
+
+    loadProperties();
+
+  </script>
+</body>
+</html>
