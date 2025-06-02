@@ -25,7 +25,6 @@
       border-radius: 8px;
       display: none;
       z-index: 10;
-      max-width: 250px;
     }
     .top-button {
       position: absolute;
@@ -38,7 +37,6 @@
       border-radius: 5px;
       cursor: pointer;
       z-index: 10;
-      user-select: none;
     }
     #saleBtn { left: 10px; }
     #searchToggle { left: 80px; }
@@ -82,7 +80,6 @@
       border: none;
       pointer-events: auto;
       cursor: pointer;
-      user-select: none;
     }
     .orbit-button:hover {
       background: darkorange;
@@ -102,279 +99,253 @@
   </style>
 </head>
 <body>
+  <div id="globeViz"></div>
 
-<div id="globeViz"></div>
+  <!-- Buttons -->
+  <button id="saleBtn" class="top-button">Sale</button> 
+  <button id="searchToggle" class="top-button">Search</button> 
+  <button id="rentBtn" class="top-button">Rent</button> 
+  <button id="adminToggle" class="top-button">Admin</button> 
+  <button id="startBtn" class="top-button">START</button> 
+  <button id="resetBtn" class="top-button">Rifillo</button>
 
-<!-- Buttons -->
-<button id="saleBtn" class="top-button">Sale</button>
-<button id="searchToggle" class="top-button">Search</button>
-<button id="rentBtn" class="top-button">Rent</button>
-<button id="adminToggle" class="top-button">Admin</button>
-<button id="startBtn" class="top-button">START</button>
-<button id="resetBtn" class="top-button">Rifillo</button>
-
-<!-- Filters -->
-<div id="filterPanel">
-  <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
-  <input type="text" id="filter-city" placeholder="Qyteti / Shteti" />
-  <input type="number" id="filter-price" placeholder="Çmimi max" />
-  <input type="number" id="filter-min-price" placeholder="Çmimi min" />
-  <select id="filter-sort">
-    <option value="">Rendit sipas</option>
-    <option value="asc">Çmimi në rritje</option>
-    <option value="desc">Çmimi në zbritje</option>
-  </select>
-  <button onclick="applyFilters()">Filtro</button>
-</div>
-
-<!-- Admin Panel -->
-<div id="adminPanel">
-  <h4>Shto Pronë</h4>
-  <input type="text" id="new-category" placeholder="Kategoria" />
-  <input type="text" id="new-city" placeholder="Qyteti/Shteti" />
-  <input type="number" id="new-price" placeholder="Çmimi" />
-  <input type="number" id="new-lat" placeholder="Gjerësia (lat)" />
-  <input type="number" id="new-lng" placeholder="Gjatësia (lng)" />
-  <label>Tipi i pronës:
-    <select id="new-type">
-      <option value="sale">Në shitje</option>
-      <option value="rent">Me qira</option>
+  <!-- Filters -->
+  <div id="filterPanel">
+    <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
+    <input type="text" id="filter-city" placeholder="Qyteti / Shteti" />
+    <input type="number" id="filter-price" placeholder="Çmimi max" />
+    <input type="number" id="filter-min-price" placeholder="Çmimi min" />
+    <select id="filter-sort">
+      <option value="">Rendit sipas</option>
+      <option value="asc">Çmimi në rritje</option>
+      <option value="desc">Çmimi në zbritje</option>
     </select>
-  </label>
-  <button onclick="addProperty()">Publiko</button>
-  <button onclick="signOut()">Dil</button>
-</div>
+    <button onclick="applyFilters()">Filtro</button>
+  </div>
 
-<!-- Orbit categories -->
-<div id="categoryCircle">
-  <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
-  <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
-  <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
-  <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
-  <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
-  <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
-  <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
-</div>
+  <!-- Admin Panel -->
+  <div id="adminPanel">
+    <h4>Shto Pronë</h4>
+    <input type="text" id="new-category" placeholder="Kategoria" />
+    <input type="text" id="new-city" placeholder="Qyteti/Shteti" />
+    <input type="number" id="new-price" placeholder="Çmimi" />
+    <input type="number" id="new-lat" placeholder="Gjerësia (lat)" />
+    <input type="number" id="new-lng" placeholder="Gjatësia (lng)" />
+    <label>
+      Tipi i pronës:
+      <select id="new-type">
+        <option value="sale">Në shitje</option>
+        <option value="rent">Me qira</option>
+      </select>
+    </label>
+    <button onclick="addProperty()">Publiko</button>
+  </div>
 
-<!-- Libraries -->
-<script src="https://unpkg.com/three"></script>
-<script src="https://unpkg.com/globe.gl"></script>
+  <!-- Orbit categories -->
+  <div id="categoryCircle">
+    <button class="orbit-button" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+    <button class="orbit-button" onclick="filterByCategory('Vilë')">Vilë</button>
+    <button class="orbit-button" onclick="filterByCategory('Apartament')">Apartament</button>
+    <button class="orbit-button" onclick="filterByCategory('Magazinë')">Magazinë</button>
+    <button class="orbit-button" onclick="filterByCategory('Kapanon')">Kapanon</button>
+    <button class="orbit-button" onclick="filterByCategory('Parking')">Parking</button>
+    <button class="orbit-button" onclick="filterByCategory('Parcelë')">Parcelë</button>
+  </div>
 
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+  <!-- Libraries -->
+  <script src="https://unpkg.com/three"></script>
+  <script src="https://unpkg.com/globe.gl"></script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
-    authDomain: "shpi-d4e2d.firebaseapp.com",
-    projectId: "shpi-d4e2d",
-    storageBucket: "shpi-d4e2d.appspot.com",
-    messagingSenderId: "600471884377",
-    appId: "1:600471884377:web:5512544dc9dfb1fa009748"
-  };
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
+      authDomain: "shpi-d4e2d.firebaseapp.com",
+      projectId: "shpi-d4e2d",
+      storageBucket: "shpi-d4e2d.appspot.com",
+      messagingSenderId: "600471884377",
+      appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+    };
 
-  const propertyCol = collection(db, "properties");
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-  let allProperties = [];
-  let selectedCategory = "";
-  let selectedType = "";
+    // Firestore collection ref
+    const propertyCol = collection(db, "properties");
 
-  const globe = Globe()(document.getElementById('globeViz'))
-    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-    .backgroundColor('#000')
-    .pointOfView({ lat: 20, lng: 0, altitude: 2 });
+    // Glob variables
+    let allProperties = [];
+    let selectedCategory = "";
+    let selectedType = "";
 
-  function renderPoints(data) {
-    globe.pointsData(data)
-      .pointLat(d => d.lat)
-      .pointLng(d => d.lng)
-      .pointAltitude(0.05)
-      .pointColor(() => 'orange')
-      .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price.toLocaleString('sq-AL')}`);
+    // Globe setup
+    const globe = Globe()(document.getElementById('globeViz'))
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+      .backgroundColor('#000')
+      .pointOfView({ lat: 20, lng: 0, altitude: 2 });
 
-    updateCategoryFilter(data);
-  }
+    // Render globe points & update category filter dropdown
+    function renderPoints(data) {
+      globe.pointsData(data)
+        .pointLat(d => d.lat)
+        .pointLng(d => d.lng)
+        .pointAltitude(0.05)
+        .pointColor(() => 'orange')
+        .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price.toLocaleString('sq-AL')}`);
 
-  function updateCategoryFilter(data) {
-    const categories = [...new Set(data.map(p => p.category))];
-    const select = document.getElementById("filter-category");
-    select.innerHTML = '<option value="">Të gjitha kategoritë</option>';
-    categories.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat;
-      opt.textContent = cat;
-      select.appendChild(opt);
-    });
-  }
-
-  function applyFilters() {
-    const fCategory = document.getElementById("filter-category").value.toLowerCase();
-    const fCity = document.getElementById("filter-city").value.toLowerCase();
-    const fMax = parseFloat(document.getElementById("filter-price").value);
-    const fMin = parseFloat(document.getElementById("filter-min-price").value);
-    const sort = document.getElementById("filter-sort").value;
-
-    let filtered = allProperties.filter(p => {
-      return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
-             (!fCity || p.city.toLowerCase().includes(fCity)) &&
-             (!fMax || p.price <= fMax) &&
-             (!fMin || p.price >= fMin);
-    });
-
-    if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
-    if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
-
-    renderPoints(filtered);
-  }
-
-  window.addProperty = async function () {
-    if (!auth.currentUser) {
-      alert("Duhet të jesh i kyçur si admin për të shtuar pronë.");
-      return;
+      updateCategoryFilter(data);
     }
 
-    const category = document.getElementById("new-category").value.trim();
-    const city = document.getElementById("new-city").value.trim();
-    const price = parseFloat(document.getElementById("new-price").value);
-    const lat = parseFloat(document.getElementById("new-lat").value);
-    const lng = parseFloat(document.getElementById("new-lng").value);
-    const type = document.getElementById("new-type").value;
-
-    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-      alert("Plotëso të gjitha fushat saktë.");
-      return;
+    // Update category dropdown options dynamically
+    function updateCategoryFilter(data) {
+      const categories = [...new Set(data.map(p => p.category))];
+      const select = document.getElementById("filter-category");
+      select.innerHTML = '<option value="">Të gjitha kategoritë</option>';
+      categories.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        select.appendChild(opt);
+      });
     }
 
-    const newProp = { category, city, price, lat, lng, type };
+    // Apply filters on properties & render filtered points
+    window.applyFilters = function () {
+      const fCategory = document.getElementById("filter-category").value.toLowerCase();
+      const fCity = document.getElementById("filter-city").value.toLowerCase();
+      const fMax = parseFloat(document.getElementById("filter-price").value);
+      const fMin = parseFloat(document.getElementById("filter-min-price").value);
+      const sort = document.getElementById("filter-sort").value;
 
-    try {
-      await addDoc(propertyCol, newProp);
-      alert("Prona u shtua me sukses!");
-      // Pas shtimit, input-et i pastrojmë:
-      document.getElementById("new-category").value = "";
-      document.getElementById("new-city").value = "";
-      document.getElementById("new-price").value = "";
-      document.getElementById("new-lat").value = "";
-      document.getElementById("new-lng").value = "";
-      document.getElementById("new-type").value = "sale";
-      // Rifreskojmë automatikisht përmes listener-it në firestore
-    } catch (e) {
-      console.error(e);
-      alert("Gabim gjatë shtimit të pronës.");
+      let filtered = allProperties.filter(p => {
+        return (!fCategory || p.category.toLowerCase().includes(fCategory)) &&
+               (!fCity || p.city.toLowerCase().includes(fCity)) &&
+               (!fMax || p.price <= fMax) &&
+               (!fMin || p.price >= fMin);
+      });
+
+      if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
+      if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
+
+      renderPoints(filtered);
     }
-  };
 
-  function filterByCategory(cat) {
-    selectedCategory = cat;
-    applyCategoryAndTypeFilter();
-  }
-
-  function applyCategoryAndTypeFilter() {
-    let filtered = allProperties;
-    if (selectedType) filtered = filtered.filter(p => p.type === selectedType);
-    if (selectedCategory) filtered = filtered.filter(p => p.category === selectedCategory);
-    renderPoints(filtered);
-  }
-
-  document.getElementById('saleBtn').onclick = () => {
-    selectedType = "sale";
-    applyCategoryAndTypeFilter();
-  };
-  document.getElementById('rentBtn').onclick = () => {
-    selectedType = "rent";
-    applyCategoryAndTypeFilter();
-  };
-
-  document.getElementById('startBtn').onclick = () => {
-    selectedType = "";
-    selectedCategory = "";
-    renderPoints(allProperties);
-    toggleUI(true);
-  };
-
-  document.getElementById('resetBtn').onclick = () => {
-    selectedType = "";
-    selectedCategory = "";
-    renderPoints(allProperties);
-    toggleUI(true);
-  };
-
-  function toggleUI(showButtons) {
-    document.getElementById('saleBtn').style.display = showButtons ? 'block' : 'none';
-    document.getElementById('rentBtn').style.display = showButtons ? 'block' : 'none';
-    document.getElementById('searchToggle').style.display = showButtons ? 'block' : 'none';
-    document.getElementById('categoryCircle').style.display = showButtons ? 'block' : 'none';
-    document.getElementById('startBtn').style.display = showButtons ? 'block' : 'none';
-    document.getElementById('resetBtn').style.display = showButtons ? 'none' : 'block';
-  }
-
-  // Login & Logout funksionaliteti me Firebase Auth
-  document.getElementById('adminToggle').onclick = async () => {
-    if (auth.currentUser) {
-      if (confirm("Dëshiron të çlogohesh?")) {
-        await signOut();
-      }
-    } else {
-      const email = prompt("Email:");
-      const password = prompt("Fjalëkalimi:");
-      if (!email || !password) {
-        alert("Plotëso email dhe fjalëkalimin.");
-        return;
-      }
+    // Add new property to Firestore
+    window.addProperty = async function () {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("U logove me sukses si admin!");
-        showAdminPanel(true);
-      } catch (e) {
-        alert("Kredencialet janë të gabuara.");
+        const category = document.getElementById("new-category").value.trim();
+        const city = document.getElementById("new-city").value.trim();
+        const price = parseFloat(document.getElementById("new-price").value);
+        const lat = parseFloat(document.getElementById("new-lat").value);
+        const lng = parseFloat(document.getElementById("new-lng").value);
+        const type = document.getElementById("new-type").value;
+
+        if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+          alert("Plotëso të gjitha fushat.");
+          return;
+        }
+
+        const newProp = { category, city, price, lat, lng, type };
+        await addDoc(propertyCol, newProp);
+        alert("Prona u shtua me sukses!");
+
+        // Pas shtimit, fshij fushat e formularit
+        document.getElementById("new-category").value = "";
+        document.getElementById("new-city").value = "";
+        document.getElementById("new-price").value = "";
+        document.getElementById("new-lat").value = "";
+        document.getElementById("new-lng").value = "";
+
+        // Nuk duhet të shtojmë manualisht në allProperties sepse onSnapshot do rifreskojë automatikisht
+      } catch (err) {
+        console.error(err);
+        alert("Gabim gjatë shtimit.");
       }
     }
-  };
 
-  function showAdminPanel(show) {
-    document.getElementById('adminPanel').style.display = show ? 'block' : 'none';
-  }
-
-  async function signOut() {
-    try {
-      await firebaseSignOut(auth);
-      alert("U çkyçe me sukses.");
-      showAdminPanel(false);
-    } catch (e) {
-      alert("Gabim gjatë çkyçjes.");
+    // Filter by category button click
+    window.filterByCategory = function(cat) {
+      selectedCategory = cat;
+      document.getElementById("filter-category").value = cat;
     }
-  }
-  window.signOut = signOut;
 
-  // Toggle filter panel
-  document.getElementById('searchToggle').onclick = () => {
-    const panel = document.getElementById('filterPanel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  };
+    // Button handlers for Sale / Rent
+    document.getElementById('saleBtn').onclick = () => {
+      selectedType = "sale";
+      document.getElementById('saleBtn').style.background = "darkorange";
+      document.getElementById('rentBtn').style.background = "orange";
+    };
+    document.getElementById('rentBtn').onclick = () => {
+      selectedType = "rent";
+      document.getElementById('rentBtn').style.background = "darkorange";
+      document.getElementById('saleBtn').style.background = "orange";
+    };
 
-  // Pozicionimi i orbit buttons rreth categoryCircle
-  function positionOrbitButtons() {
+    // Start filtering based on selected category & type
+    document.getElementById('startBtn').onclick = () => {
+      let filtered = allProperties;
+
+      if (selectedType) filtered = filtered.filter(p => p.type === selectedType);
+      if (selectedCategory) filtered = filtered.filter(p => p.category === selectedCategory);
+
+      renderPoints(filtered);
+
+      document.getElementById('saleBtn').style.display = 'none';
+      document.getElementById('rentBtn').style.display = 'none';
+      document.getElementById('searchToggle').style.display = 'none';
+      document.getElementById('categoryCircle').style.display = 'none';
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'block';
+    };
+
+    // Reset filters and UI
+    document.getElementById('resetBtn').onclick = () => {
+      selectedType = '';
+      selectedCategory = '';
+      renderPoints(allProperties);
+
+      document.getElementById('saleBtn').style.background = "orange";
+      document.getElementById('rentBtn').style.background = "orange";
+
+      document.getElementById('saleBtn').style.display = 'block';
+      document.getElementById('rentBtn').style.display = 'block';
+      document.getElementById('searchToggle').style.display = 'block';
+      document.getElementById('categoryCircle').style.display = 'block';
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('resetBtn').style.display = 'none';
+
+      // Also clear filters UI
+      document.getElementById("filter-category").value = "";
+      document.getElementById("filter-city").value = "";
+      document.getElementById("filter-price").value = "";
+      document.getElementById("filter-min-price").value = "";
+      document.getElementById("filter-sort").value = "";
+    };
+
+    // Toggle search panel
+    document.getElementById('searchToggle').onclick = () => {
+      const panel = document.getElementById('filterPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    };
+
+    // Position orbit buttons in circle
     const orbitButtons = document.querySelectorAll('.orbit-button');
-    const radius = 200;
-    const center = 250;
+    const radius = 160;
     orbitButtons.forEach((btn, i) => {
       const angle = (i / orbitButtons.length) * 2 * Math.PI;
-      const x = center + radius * Math.cos(angle) - btn.offsetWidth / 2;
-      const y = center + radius * Math.sin(angle) - btn.offsetHeight / 2;
-      btn.style.left = `${x}px`;
-      btn.style.top = `${y}px`;
-      btn.style.position = 'absolute';
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      btn.style.left = `${250 + x - 50}px`;
+      btn.style.top = `${250 + y - 50}px`;
     });
-  }
-  positionOrbitButtons();
 
-  // Listen për ndryshime në Firestore për rifreskim automatik
-  const q = query(propertyCol, orderBy("price", "asc"));
-  onSnapshot(q, (snapshot) => {
-    allProperties = snapshot.docs.map(doc => doc.data());
+    // Firebase Authentication - Admin login/logout logic
+    function showAdminPanel() {
+      document.getElementById
