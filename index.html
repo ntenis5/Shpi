@@ -2,7 +2,7 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prona në Glob</title>
   <style>
     body {
@@ -25,6 +25,7 @@
       border-radius: 8px;
       display: none;
       z-index: 10;
+      max-width: 250px;
     }
     .top-button {
       position: absolute;
@@ -37,6 +38,7 @@
       border-radius: 5px;
       cursor: pointer;
       z-index: 10;
+      user-select: none;
     }
     #saleBtn { left: 10px; }
     #searchToggle { left: 80px; }
@@ -80,6 +82,7 @@
       border: none;
       pointer-events: auto;
       cursor: pointer;
+      user-select: none;
     }
     .orbit-button:hover {
       background: darkorange;
@@ -113,9 +116,9 @@
 <!-- Filters -->
 <div id="filterPanel">
   <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
-  <input type="text" id="filter-city" placeholder="Qyteti / Shteti">
-  <input type="number" id="filter-price" placeholder="Çmimi max">
-  <input type="number" id="filter-min-price" placeholder="Çmimi min">
+  <input type="text" id="filter-city" placeholder="Qyteti / Shteti" />
+  <input type="number" id="filter-price" placeholder="Çmimi max" />
+  <input type="number" id="filter-min-price" placeholder="Çmimi min" />
   <select id="filter-sort">
     <option value="">Rendit sipas</option>
     <option value="asc">Çmimi në rritje</option>
@@ -127,11 +130,11 @@
 <!-- Admin Panel -->
 <div id="adminPanel">
   <h4>Shto Pronë</h4>
-  <input type="text" id="new-category" placeholder="Kategoria">
-  <input type="text" id="new-city" placeholder="Qyteti/Shteti">
-  <input type="number" id="new-price" placeholder="Çmimi">
-  <input type="number" id="new-lat" placeholder="Gjerësia (lat)">
-  <input type="number" id="new-lng" placeholder="Gjatësia (lng)">
+  <input type="text" id="new-category" placeholder="Kategoria" />
+  <input type="text" id="new-city" placeholder="Qyteti/Shteti" />
+  <input type="number" id="new-price" placeholder="Çmimi" />
+  <input type="number" id="new-lat" placeholder="Gjerësia (lat)" />
+  <input type="number" id="new-lng" placeholder="Gjatësia (lng)" />
   <label>Tipi i pronës:
     <select id="new-type">
       <option value="sale">Në shitje</option>
@@ -139,6 +142,7 @@
     </select>
   </label>
   <button onclick="addProperty()">Publiko</button>
+  <button onclick="signOut()">Dil</button>
 </div>
 
 <!-- Orbit categories -->
@@ -159,8 +163,8 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
@@ -174,6 +178,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+
   const propertyCol = collection(db, "properties");
 
   let allProperties = [];
@@ -192,6 +197,7 @@
       .pointAltitude(0.05)
       .pointColor(() => 'orange')
       .pointLabel(d => `${d.category}<br>${d.city}<br>€${d.price.toLocaleString('sq-AL')}`);
+
     updateCategoryFilter(data);
   }
 
@@ -227,88 +233,148 @@
     renderPoints(filtered);
   }
 
-  async function loadProperties() {
-    const propertySnap = await getDocs(propertyCol);
-    allProperties = propertySnap.docs.map(doc => doc.data());
-    renderPoints(allProperties);
-  }
-
   window.addProperty = async function () {
+    if (!auth.currentUser) {
+      alert("Duhet të jesh i kyçur si admin për të shtuar pronë.");
+      return;
+    }
+
+    const category = document.getElementById("new-category").value.trim();
+    const city = document.getElementById("new-city").value.trim();
+    const price = parseFloat(document.getElementById("new-price").value);
+    const lat = parseFloat(document.getElementById("new-lat").value);
+    const lng = parseFloat(document.getElementById("new-lng").value);
+    const type = document.getElementById("new-type").value;
+
+    if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+      alert("Plotëso të gjitha fushat saktë.");
+      return;
+    }
+
+    const newProp = { category, city, price, lat, lng, type };
+
     try {
-      const category = document.getElementById("new-category").value;
-      const city = document.getElementById("new-city").value;
-      const price = parseFloat(document.getElementById("new-price").value);
-      const lat = parseFloat(document.getElementById("new-lat").value);
-      const lng = parseFloat(document.getElementById("new-lng").value);
-      const type = document.getElementById("new-type").value;
-
-      if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
-        alert("Plotëso të gjitha fushat.");
-        return;
-      }
-
-      const newProp = { category, city, price, lat, lng, type };
       await addDoc(propertyCol, newProp);
       alert("Prona u shtua me sukses!");
-
-      await loadProperties(); // Rifreskon të dhënat
-    } catch (err) {
-      console.error(err);
-      alert("Gabim gjatë shtimit.");
+      // Pas shtimit, input-et i pastrojmë:
+      document.getElementById("new-category").value = "";
+      document.getElementById("new-city").value = "";
+      document.getElementById("new-price").value = "";
+      document.getElementById("new-lat").value = "";
+      document.getElementById("new-lng").value = "";
+      document.getElementById("new-type").value = "sale";
+      // Rifreskojmë automatikisht përmes listener-it në firestore
+    } catch (e) {
+      console.error(e);
+      alert("Gabim gjatë shtimit të pronës.");
     }
   };
 
   function filterByCategory(cat) {
     selectedCategory = cat;
+    applyCategoryAndTypeFilter();
   }
 
-  document.getElementById('saleBtn').onclick = () => selectedType = "sale";
-  document.getElementById('rentBtn').onclick = () => selectedType = "rent";
+  function applyCategoryAndTypeFilter() {
+    let filtered = allProperties;
+    if (selectedType) filtered = filtered.filter(p => p.type === selectedType);
+    if (selectedCategory) filtered = filtered.filter(p => p.category === selectedCategory);
+    renderPoints(filtered);
+  }
+
+  document.getElementById('saleBtn').onclick = () => {
+    selectedType = "sale";
+    applyCategoryAndTypeFilter();
+  };
+  document.getElementById('rentBtn').onclick = () => {
+    selectedType = "rent";
+    applyCategoryAndTypeFilter();
+  };
 
   document.getElementById('startBtn').onclick = () => {
-    let filtered = allProperties;
-
-    if (selectedType) {
-      filtered = filtered.filter(p => p.type === selectedType);
-    }
-    if (selectedCategory) {
-      filtered = filtered.filter(p => p.category === selectedCategory);
-    }
-
-    renderPoints(filtered);
-
-    document.getElementById('saleBtn').style.display = 'none';
-    document.getElementById('rentBtn').style.display = 'none';
-    document.getElementById('searchToggle').style.display = 'none';
-    document.getElementById('categoryCircle').style.display = 'none';
-    document.getElementById('startBtn').style.display = 'none';
-    document.getElementById('resetBtn').style.display = 'block';
+    selectedType = "";
+    selectedCategory = "";
+    renderPoints(allProperties);
+    toggleUI(true);
   };
 
   document.getElementById('resetBtn').onclick = () => {
-    selectedType = '';
-    selectedCategory = '';
+    selectedType = "";
+    selectedCategory = "";
     renderPoints(allProperties);
-
-    document.getElementById('saleBtn').style.display = 'block';
-    document.getElementById('rentBtn').style.display = 'block';
-    document.getElementById('searchToggle').style.display = 'block';
-    document.getElementById('categoryCircle').style.display = 'block';
-    document.getElementById('startBtn').style.display = 'block';
-    document.getElementById('resetBtn').style.display = 'none';
+    toggleUI(true);
   };
 
-  function showAdminPanel() {
-    document.getElementById('adminPanel').style.display = 'block';
+  function toggleUI(showButtons) {
+    document.getElementById('saleBtn').style.display = showButtons ? 'block' : 'none';
+    document.getElementById('rentBtn').style.display = showButtons ? 'block' : 'none';
+    document.getElementById('searchToggle').style.display = showButtons ? 'block' : 'none';
+    document.getElementById('categoryCircle').style.display = showButtons ? 'block' : 'none';
+    document.getElementById('startBtn').style.display = showButtons ? 'block' : 'none';
+    document.getElementById('resetBtn').style.display = showButtons ? 'none' : 'block';
   }
 
-  function hideAdminPanel() {
-    document.getElementById('adminPanel').style.display = 'none';
-  }
-
+  // Login & Logout funksionaliteti me Firebase Auth
   document.getElementById('adminToggle').onclick = async () => {
     if (auth.currentUser) {
       if (confirm("Dëshiron të çlogohesh?")) {
-        await auth.signOut();
-        hideAdminPanel();
-        alert("U çlogove
+        await signOut();
+      }
+    } else {
+      const email = prompt("Email:");
+      const password = prompt("Fjalëkalimi:");
+      if (!email || !password) {
+        alert("Plotëso email dhe fjalëkalimin.");
+        return;
+      }
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("U logove me sukses si admin!");
+        showAdminPanel(true);
+      } catch (e) {
+        alert("Kredencialet janë të gabuara.");
+      }
+    }
+  };
+
+  function showAdminPanel(show) {
+    document.getElementById('adminPanel').style.display = show ? 'block' : 'none';
+  }
+
+  async function signOut() {
+    try {
+      await firebaseSignOut(auth);
+      alert("U çkyçe me sukses.");
+      showAdminPanel(false);
+    } catch (e) {
+      alert("Gabim gjatë çkyçjes.");
+    }
+  }
+  window.signOut = signOut;
+
+  // Toggle filter panel
+  document.getElementById('searchToggle').onclick = () => {
+    const panel = document.getElementById('filterPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Pozicionimi i orbit buttons rreth categoryCircle
+  function positionOrbitButtons() {
+    const orbitButtons = document.querySelectorAll('.orbit-button');
+    const radius = 200;
+    const center = 250;
+    orbitButtons.forEach((btn, i) => {
+      const angle = (i / orbitButtons.length) * 2 * Math.PI;
+      const x = center + radius * Math.cos(angle) - btn.offsetWidth / 2;
+      const y = center + radius * Math.sin(angle) - btn.offsetHeight / 2;
+      btn.style.left = `${x}px`;
+      btn.style.top = `${y}px`;
+      btn.style.position = 'absolute';
+    });
+  }
+  positionOrbitButtons();
+
+  // Listen për ndryshime në Firestore për rifreskim automatik
+  const q = query(propertyCol, orderBy("price", "asc"));
+  onSnapshot(q, (snapshot) => {
+    allProperties = snapshot.docs.map(doc => doc.data());
