@@ -7,7 +7,7 @@ const firebaseConfig = {
   authDomain: "projekti.firebaseapp.com",
   projectId: "projekti",
   storageBucket: "projekti.appspot.com",
-  messagingSenderId: "000000000000",
+  messagingSenderId: "000000000",
   appId: "APP_ID_YT"
 };
 
