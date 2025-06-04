@@ -4,19 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Menaxhimi i Pronave</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #adminPanel, #filterPanel {
+      border: 1px solid #ddd;
+      padding: 16px;
+      margin-top: 10px;
+      border-radius: 8px;
+      max-width: 400px;
+      background-color: #f9f9f9;
+    }
+
+    input, select {
+      display: block;
+      margin-bottom: 8px;
+      padding: 6px;
+      width: 100%;
+    }
+
+    button {
+      margin-top: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
   <button id="adminToggle">Hyr si Admin</button>
-  <div id="filterPanel">...filtër për përdorues...</div>
+
+  <div id="filterPanel">
+    <p>Filtër për përdorues të thjeshtë (mund të shtosh më vonë).</p>
+  </div>
 
   <div id="adminPanel" style="display: none;">
     <h2>Paneli i Adminit</h2>
     <input id="new-category" placeholder="Kategoria">
     <input id="new-city" placeholder="Qyteti">
     <input id="new-price" type="number" placeholder="Çmimi">
-    <input id="new-lat" type="number" placeholder="Gjerësia gjeografike">
-    <input id="new-lng" type="number" placeholder="Gjatësia gjeografike">
+    <input id="new-lat" type="number" placeholder="Gjerësia">
+    <input id="new-lng" type="number" placeholder="Gjatësia">
     <select id="new-type">
       <option value="qira">Qira</option>
       <option value="shitje">Shitje</option>
@@ -25,7 +56,7 @@
     <button id="logoutBtn">Dil</button>
   </div>
 
-  <!-- Lidhja e skripteve -->
+  <!-- Skriptet -->
   <script type="module" src="./js/main.js"></script>
   <script type="module" src="./js/admin.js"></script>
 </body>
