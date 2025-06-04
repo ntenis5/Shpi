@@ -1,23 +1,23 @@
 <script type="module">
+  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
-    apiKey: "AIzaSyAWg5xS5BX6hHeRdgi7YnNgVu8iQLXhGdU",
-    authDomain: "shpi-df1ff.firebaseapp.com",
-    projectId: "shpi-df1ff",
-    storageBucket: "shpi-df1ff.appspot.com",
-    messagingSenderId: "983229738097",
-    appId: "1:983229738097:web:3822cf4e012755c9d6bfd0",
-    measurementId: "G-BQNNBXMEES"
+    apiKey: "AIzaSyAaK8yZ17FRgcHt0wYAFEhrEPa7mmKkIPk",
+    authDomain: "shpi-86f01.firebaseapp.com",
+    projectId: "shpi-86f01",
+    storageBucket: "shpi-86f01.firebasestorage.app",
+    messagingSenderId: "252663273559",
+    appId: "1:252663273559:web:f3ef6f455a5ddebd352b12",
+    measurementId: "G-BPG31D3BCG"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // Mund të vazhdosh këtu me funksionet si login(), loadProperties(), etj. duke përdorur auth dhe db.
 </script>
