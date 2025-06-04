@@ -1,57 +1,66 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { auth, signInWithEmailAndPassword, signOut } from './firebase-config.js';
+import { addDoc, collection } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
-// Firebase konfigurimi
-const firebaseConfig = {
-  apiKey: "AIzaSyAzeg2ha8agdS5zKFB34Udwj2CTMJamy0E",
-  authDomain: "shpi-d4e2d.firebaseapp.com",
-  projectId: "shpi-d4e2d",
-  storageBucket: "shpi-d4e2d.appspot.com",
-  messagingSenderId: "600471884377",
-  appId: "1:600471884377:web:5512544dc9dfb1fa009748"
+const adminPanel = document.getElementById("adminPanel");
+const filterPanel = document.getElementById("filterPanel");
+const propertyCol = collection(db, "properties"); // duhet importuar edhe db nëse ndodhet jashtë
+
+document.getElementById("adminToggle").onclick = () => {
+  const email = prompt("Shkruani email-in:");
+  const password = prompt("Shkruani fjalëkalimin:");
+
+  if (!email || !password) {
+    alert("Email ose fjalëkalim i pavlefshëm.");
+    return;
+  }
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      adminPanel.style.display = "block";
+      filterPanel.style.display = "none";
+    })
+    .catch(error => {
+      alert("Gabim në autentikim: " + error.message);
+    });
 };
 
-// Inicializimi
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const propertyCol = collection(db, "properties");
+document.getElementById("logoutBtn").onclick = () => {
+  signOut(auth)
+    .then(() => {
+      adminPanel.style.display = "none";
+      alert("U shkyçët me sukses.");
+    })
+    .catch(err => {
+      alert("Gabim gjatë shkyçjes.");
+    });
+};
 
-// Ngarko të gjitha pronat në tabelë
-async function loadProperties() {
-  const table = document.getElementById("property-table");
-  const snapshot = await getDocs(propertyCol);
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    const row = document.createElement("tr");
+document.getElementById("addPropertyBtn").onclick = async () => {
+  const category = document.getElementById("new-category").value.trim();
+  const city = document.getElementById("new-city").value.trim();
+  const price = parseFloat(document.getElementById("new-price").value);
+  const lat = parseFloat(document.getElementById("new-lat").value);
+  const lng = parseFloat(document.getElementById("new-lng").value);
+  const type = document.getElementById("new-type").value;
 
-    row.innerHTML = `
-      <td>${data.category}</td>
-      <td>${data.city}</td>
-      <td>€${data.price}</td>
-      <td>${data.lat}</td>
-      <td>${data.lng}</td>
-      <td>
-        <button onclick="deleteProperty('${docSnap.id}')">🗑️ Fshi</button>
-      </td>
-    `;
+  if (!category || !city || isNaN(price) || isNaN(lat) || isNaN(lng)) {
+    alert("Ju lutem plotësoni të gjitha fushat me të dhëna valide.");
+    return;
+  }
 
-    table.appendChild(row);
-  });
-}
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    alert("Koordinatat janë jashtë kufijve të lejuar.");
+    return;
+  }
 
-// Fshi një pronë
-window.deleteProperty = async function (id) {
-  if (confirm("A je i sigurt që do të fshish këtë pronë?")) {
-    try {
-      await deleteDoc(doc(db, "properties", id));
-      alert("Prona u fshi me sukses.");
-      location.reload();
-    } catch (err) {
-      console.error("Gabim gjatë fshirjes:", err);
-      alert("❌ Fshirja dështoi.");
-    }
+  try {
+    const newProp = { category, city, price, lat, lng, type };
+    const docRef = await addDoc(propertyCol, newProp);
+    newProp.id = docRef.id;
+    alert("Prona u shtua me sukses!");
+    // nëse ke funksione globale si renderPoints, thirri këtu nëse janë të importuara
+    adminPanel.style.display = "none";
+  } catch (err) {
+    alert("Gabim gjatë shtimit të pronës.");
   }
 };
-
-// Thirrja për të ngarkuar të dhënat kur skripti ekzekutohet
-loadProperties();
