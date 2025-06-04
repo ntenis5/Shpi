@@ -2,62 +2,165 @@
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menaxhimi i Pronave</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prona në Glob</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      margin: 0;
+      font-family: sans-serif;
+      background: #000;
+      color: white;
     }
-
-    #adminPanel, #filterPanel {
-      border: 1px solid #ddd;
-      padding: 16px;
-      margin-top: 10px;
+    #globeViz {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+    }
+    #filterPanel, #adminPanel {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
       border-radius: 8px;
-      max-width: 400px;
-      background-color: #f9f9f9;
+      display: none;
+      z-index: 10;
+      max-width: 300px;
     }
-
+    .top-button {
+      position: absolute;
+      top: 10px;
+      padding: 8px 16px;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 20;
+      user-select: none;
+    }
+    #saleBtn { left: 10px; }
+    #searchToggle { left: 75px; }
+    #rentBtn { left: 160px; }
+    #startBtn {
+      right: 80px;
+      background: green;
+      color: white;
+    }
+    #resetBtn {
+      right: 10px;
+      background: gray;
+      color: white;
+      display: none;
+    }
+    #adminToggle {
+      right: 0px;
+      background: crimson;
+      color: white;
+    }
+    #categoryCircle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 400px;
+      height: 400px;
+      margin-left: -200px;
+      margin-top: -200px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .orbit-button {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border: none;
+      pointer-events: auto;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    .orbit-button:hover {
+      background: darkorange;
+    }
     input, select {
-      display: block;
-      margin-bottom: 8px;
-      padding: 6px;
       width: 100%;
+      margin-bottom: 7px;
+      padding: 6px;
+      border-radius: 5px;
+      border: none;
     }
-
     button {
-      margin-top: 6px;
-      padding: 8px 12px;
+      padding: 8px;
+      border-radius: 5px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <div id="globeViz"></div>
 
-  <button id="adminToggle">Hyr si Admin</button>
+  <!-- Top Buttons -->
+  <button id="saleBtn" class="top-button">Sale</button>
+  <button id="searchToggle" class="top-button">Search</button>
+  <button id="rentBtn" class="top-button">Rent</button>
+  <button id="adminToggle" class="top-button">Admin</button>
+  <button id="startBtn" class="top-button">START</button>
+  <button id="resetBtn" class="top-button">Rifillo</button>
 
+  <!-- Filter Panel -->
   <div id="filterPanel">
-    <p>Filtër për përdorues të thjeshtë (mund të shtosh më vonë).</p>
-  </div>
-
-  <div id="adminPanel" style="display: none;">
-    <h2>Paneli i Adminit</h2>
-    <input id="new-category" placeholder="Kategoria">
-    <input id="new-city" placeholder="Qyteti">
-    <input id="new-price" type="number" placeholder="Çmimi">
-    <input id="new-lat" type="number" placeholder="Gjerësia">
-    <input id="new-lng" type="number" placeholder="Gjatësia">
-    <select id="new-type">
-      <option value="qira">Qira</option>
-      <option value="shitje">Shitje</option>
+    <select id="filter-category"><option value="">Të gjitha kategoritë</option></select>
+    <input type="text" id="filter-city" placeholder="Qyteti / Shteti" />
+    <input type="number" id="filter-min-price" placeholder="Çmimi min" />
+    <input type="number" id="filter-price" placeholder="Çmimi max" />
+    <select id="filter-sort">
+      <option value="">Rendit sipas</option>
+      <option value="asc">Çmimi në rritje</option>
+      <option value="desc">Çmimi në zbritje</option>
     </select>
-    <button id="addPropertyBtn">Shto Pronë</button>
-    <button id="logoutBtn">Dil</button>
+    <button id="applyFilterBtn">Filtro</button>
   </div>
 
-  <!-- Skriptet -->
-  <script type="module" src="./js/main.js"></script>
-  <script type="module" src="./js/admin.js"></script>
+  <!-- Admin Panel -->
+  <div id="adminPanel">
+    <h4>Shto Pronë</h4>
+    <input type="text" id="new-category" placeholder="Kategoria" />
+    <input type="text" id="new-city" placeholder="Qyteti/Shteti" />
+    <input type="number" id="new-price" placeholder="Çmimi" />
+    <input type="number" id="new-lat" placeholder="Gjerësia (lat)" />
+    <input type="number" id="new-lng" placeholder="Gjatësia (lng)" />
+    <label>Tipi i pronës:
+      <select id="new-type">
+        <option value="sale">Në shitje</option>
+        <option value="rent">Me qira</option>
+      </select>
+    </label>
+    <button id="addPropertyBtn">Publiko</button>
+    <hr />
+    <button id="logoutBtn">Dil nga admin</button>
+  </div>
+
+  <!-- Orbit Category Circle -->
+  <div id="categoryCircle">
+    <button class="orbit-button" style="top:10%; left:50%" onclick="filterByCategory('Shtëpi')">Shtëpi</button>
+    <button class="orbit-button" style="top:30%; left:80%" onclick="filterByCategory('Vilë')">Vilë</button>
+    <button class="orbit-button" style="top:65%; left:85%" onclick="filterByCategory('Apartament')">Apartament</button>
+    <button class="orbit-button" style="top:85%; left:55%" onclick="filterByCategory('Magazinë')">Magazinë</button>
+    <button class="orbit-button" style="top:70%; left:20%" onclick="filterByCategory('Kapanon')">Kapanon</button>
+    <button class="orbit-button" style="top:35%; left:15%" onclick="filterByCategory('Parking')">Parking</button>
+    <button class="orbit-button" style="top:50%; left:40%" onclick="filterByCategory('Parcelë')">Parcelë</button>
+  </div>
+
+  <!-- Dependencies -->
+  <script src="https://unpkg.com/three"></script>
+  <script src="https://unpkg.com/globe.gl"></script>
+
+  <!-- Main App Logic -->
+  <script type="module" src="./main.js"></script>
 </body>
 </html>
