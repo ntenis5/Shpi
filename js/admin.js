@@ -1,9 +1,9 @@
-import { auth, signInWithEmailAndPassword, signOut } from './firebase-config.js';
+import { auth, db } from './firebase-config.js';
+import { signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
 import { addDoc, collection } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 const adminPanel = document.getElementById("adminPanel");
 const filterPanel = document.getElementById("filterPanel");
-const propertyCol = collection(db, "properties"); // duhet importuar edhe db nëse ndodhet jashtë
 
 document.getElementById("adminToggle").onclick = () => {
   const email = prompt("Shkruani email-in:");
@@ -55,10 +55,8 @@ document.getElementById("addPropertyBtn").onclick = async () => {
 
   try {
     const newProp = { category, city, price, lat, lng, type };
-    const docRef = await addDoc(propertyCol, newProp);
-    newProp.id = docRef.id;
+    await addDoc(collection(db, "properties"), newProp);
     alert("Prona u shtua me sukses!");
-    // nëse ke funksione globale si renderPoints, thirri këtu nëse janë të importuara
     adminPanel.style.display = "none";
   } catch (err) {
     alert("Gabim gjatë shtimit të pronës.");
