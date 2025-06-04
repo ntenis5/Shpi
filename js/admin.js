@@ -28,6 +28,7 @@ document.getElementById("logoutBtn").onclick = () => {
   signOut(auth)
     .then(() => {
       adminPanel.style.display = "none";
+      filterPanel.style.display = "block";
       alert("U shkyçët me sukses.");
     })
     .catch(err => {
@@ -58,6 +59,7 @@ document.getElementById("addPropertyBtn").onclick = async () => {
     await addDoc(collection(db, "properties"), newProp);
     alert("Prona u shtua me sukses!");
     adminPanel.style.display = "none";
+    filterPanel.style.display = "block";
   } catch (err) {
     alert("Gabim gjatë shtimit të pronës.");
   }
